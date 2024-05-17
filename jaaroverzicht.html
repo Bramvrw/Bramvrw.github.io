@@ -12,10 +12,11 @@
 
 <body onload="Jaar()">
     <div class="container">
+        <!-- Header -->
         <header>
             <img src="img/NICE_logo.png" alt="Logo">
             <div class="header-text">
-                <h1>Nationale Intersive Care Evaluatie IC-bedden</h1>
+                <h1>Nationale Intensive Care Evaluatie IC-bedden</h1>
                 <h2>IC Bedbezetting Dashboard Prototype</h2>
             </div>
             <div class="lijn"></div>
@@ -26,18 +27,16 @@
             <a href="hoofdpagina.html">| HOOFDPAGINA</a>
             <a href="mei_overzicht.html">| MEI 2023</a>
             <a class="active" href="jaaroverzicht.html">| JAAROVERZICHT 2023</a>
-            <div class="topnav-right">
-                <a href="index.html">| LOG UIT</a>
-            </div>
+            <div class="topnav-right"><a href="index.html">| LOG UIT</a></div>
         </div>
 
         <main>
-            <!-- Hier komen de diagrammen onder elkaar te staan -->
+            <!-- Hier komen de diagrammen onder elkaar te staan met titel en beschrijving -->
             <section class="dashboard-jaar">
                 <h1>Jaaroverzicht</h1>
                 <div class="diagram">
                     <h2>Aantal opnames per maand in 2023</h2>
-                    <p>Nog niet met echte data</p>
+                    <p>Echte data</p>
                     <canvas id="jaarChart"></canvas>
                 </div>
 
@@ -64,11 +63,10 @@
                     <p>Data is niet bijgeleverd.</p>
                     <canvas id="jaarICChart"></canvas>
                 </div>
-
-
             </section>
         </main>
 
+        <!-- Footer -->
         <footer>
             <p>&copy; 2024 IC Bedbezetting Dashboard</p>
         </footer>
