@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IC Bedbezetting Dashboard Prototype</title>
+    <link rel="stylesheet" href="css/layout.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="javascript/maandoverzicht.js"></script>
+</head>
+
+<body onload="Maand()">
+    <div class= "container"> 
+        <header>
+            <img src="img/NICE_logo.png" alt="Logo">
+            <div class= "header-text">
+                <h1>Nationale Intersive Care Evaluatie IC-bedden</h1>
+                <h2>IC Bedbezetting Dashboard Prototype</h2>
+            </div>
+            <div class="lijn"></div>
+        </header>
+        
+        <!-- Navigatiemenu -->
+        <div class="topnav">
+            <a href="hoofdpagina.html">|  HOOFDPAGINA</a>
+            <a class="active" href="mei_overzicht.html">| MEI 2023</a>
+            <a href="jaaroverzicht.html">| JAAROVERZICHT 2023</a>
+            <div class="topnav-right">
+                <a href="index.html">|  LOG UIT</a>
+            </div>
+        </div>
+        
+    <main>
+        <section class="dashboard">
+        <!-- Hier komen de diagrammen onder elkaar te staan -->
+            <div class="diagram">
+                <h2>Aantal opnames per dag in mei</h2>
+                <p>Beschrijving</p>
+                <canvas id="maandChart""></canvas>
+            </div>
+            <div class="diagram">
+                <h2>Aantal opnames per dag in mei per opnametype</h2>
+                <p>Beschrijving</p>
+                <canvas id="maandOpnametypesChart"></canvas>
+            </div> 
+            <div class="diagram">
+                <h2>Aantal opnames per dag in mei per diagnosecategorie</h2>
+                <p>Beschrijving</p>
+                <canvas id="maandDiagnoseChart"></canvas>
+            </div> 
+            <div class="diagram">
+                <h2>Aantal opnames per week in mei per leeftijdscategorie</h2>
+                <p>Beschrijving</p>
+                <canvas id="LeeftijdOpnames"></canvas>
+            </div>
+            
+            <div class="diagram">
+                <h2>Gemiddelde IC-behandelduur in mei gedurende verschillende jaren</h2>
+                <p>beschrijving</p>
+                <div class="cijfer">2023<br>3,5</div>
+                <div class="cijfer">2022<br>2,1</div>
+                <div class="cijfer">2021<br>4</div>
+                <div class="cijfer">2020<br>3,8</div>
+                <br>
+                <br>
+            </div>   
+        </section>
+    </main>
+    
+    <footer>
+        <p>&copy; 2024 IC Bedbezetting Dashboard</p>
+    </footer>
+    </div>
+</body>
+</html>
