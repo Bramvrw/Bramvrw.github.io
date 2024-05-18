@@ -1,6 +1,8 @@
 //-------------- OPMERKINGEN -----------------//
 //Bij elke grafiek in de opties ervoor zorgen dat de kleuren van lijnen overeenkomen  met de lijnen van de bars zodat duidelijk is wat bij wat hoort!!!
 // kleur van de bar iets lichter dan de kleur van de lijn. Helpt met zichtbaarheid.
+// Kijken naar de functie OpnamesDag, want we houden geen rekening met het feit dat het wekelijkse data moet zijn. Misschien kunnen we de strategie uit jaaroverzicht gebruiken samen met slicen om de gemiddeldes te berekenen.
+//----------------------------------------------------
 
 // Grafieken voor de opnames in mei
 function Maand() {
@@ -19,7 +21,7 @@ function Maand() {
 // DATA AANTALLEN OPNAMES
 // Deze functie haalt data over het totale aantal IC opnames uit mei 2021 t/m 2023 op uit de database en maakt een grafiek van deze data.
 function OpnamesDag() {
-  // Specificatie van lege arrays
+  // Specificatie van arrays
   let opnamesArray = [];
   let referentieOpnamesArray = [];
 
@@ -65,34 +67,34 @@ function OpnamesDag() {
       const dagelijkseOpnames = item.aantal_gepland + item.aantal_medisch + item.aantal_spoed;
       opnamesArray.push(dagelijkseOpnames);
     });
-  
-  // Tweede request wordt geopend, query2 wordt verstuurd
-  const request2 = new XMLHttpRequest();
-  request2.open('POST', 'https://clean-garfish-69.hasura.app/v1/graphql');
-  request2.setRequestHeader('content-type', 'application/json');
-  request2.setRequestHeader('x-hasura-admin-secret', 'JL0Fh28uE4BqS09O0EhdnQnPQ6SJSyB0LwEXd6eNpktZpR9D0qMEDd7EtOgObty4');
-  request2.send(query2);
 
-  //Hier wordt het totale aantal opnames per dag berekend en in een array gezet
-  request2.onload = function() {
-    const referentieOpnameData = JSON.parse(request2.response);
-    referentieOpnameData.data.nvic_data.forEach(item => {
-      const referentieOpnames = item.aantal_gepland + item.aantal_medisch + item.aantal_spoed;
-      referentieOpnamesArray.push(referentieOpnames);
-    });
+    // Tweede request wordt geopend, query2 wordt verstuurd
+    const request2 = new XMLHttpRequest();
+    request2.open('POST', 'https://clean-garfish-69.hasura.app/v1/graphql');
+    request2.setRequestHeader('content-type', 'application/json');
+    request2.setRequestHeader('x-hasura-admin-secret', 'JL0Fh28uE4BqS09O0EhdnQnPQ6SJSyB0LwEXd6eNpktZpR9D0qMEDd7EtOgObty4');
+    request2.send(query2);
 
-    // Dan wordt hier de data gesplitst in 2021 en 2022
-    const array2021 = referentieOpnamesArray.slice(0, 31);
-    const array2022 = referentieOpnamesArray.slice(31, 62);
+    //Hier wordt het totale aantal opnames per dag berekend en in een array gezet
+    request2.onload = function() {
+      const referentieOpnameData = JSON.parse(request2.response);
+      referentieOpnameData.data.nvic_data.forEach(item => {
+        const referentieOpnames = item.aantal_gepland + item.aantal_medisch + item.aantal_spoed;
+        referentieOpnamesArray.push(referentieOpnames);
+      });
 
-    // En wordt hier het gemiddelde aantal opnames per dag berekend en in een array gezet
-    for (let i = 0; i < array2021.length; i++) {
-      referentieOpnamesArray[i] = (array2021[i] + array2022[i]) / 2;
+      // Dan wordt hier de data gesplitst in 2021 en 2022
+      const array2021 = referentieOpnamesArray.slice(0, 31);
+      const array2022 = referentieOpnamesArray.slice(31, 62);
+
+      // En wordt hier het gemiddelde aantal opnames per dag berekend en in een array gezet
+      for (let i = 0; i < array2021.length; i++) {
+        referentieOpnamesArray[i] = (array2021[i] + array2022[i]) / 2;
+      };
+
+      // Hier wordt het maken van de grafiek opgeroepen met een array van aantallen opnames in mei 2023, en een array met gemiddelde aantallen opnames in mei 2021 en 2022
+      maakMaandGrafiekOpnames(opnamesArray, referentieOpnamesArray);
     };
-
-    // Hier wordt het maken van de grafiek opgeroepen met een array van aantallen opnames in mei 2023, en een array met gemiddelde aantallen opnames in mei 2021 en 2022
-    maakMaandGrafiekOpnames(opnamesArray, referentieOpnamesArray);
-  };
   };
 };
 
@@ -150,41 +152,41 @@ function OpnamesDagType() {
       SpoedArray.push(item.aantal_spoed);
       GeplandArray.push(item.aantal_gepland);
     });
-  
 
-  // Tweede request wordt geopend, query4 wordt verstuurd
-  const request4 = new XMLHttpRequest();
-  request4.open('POST', 'https://clean-garfish-69.hasura.app/v1/graphql');
-  request4.setRequestHeader('content-type', 'application/json');
-  request4.setRequestHeader('x-hasura-admin-secret', 'JL0Fh28uE4BqS09O0EhdnQnPQ6SJSyB0LwEXd6eNpktZpR9D0qMEDd7EtOgObty4');
-  request4.send(query4);
 
-  // Alle type opnames worden in hun eigen array gezet
-  request4.onload = function() {
-    const referentieGemiddeldeOpnametypesData = JSON.parse(request4.response);
-    referentieGemiddeldeOpnametypesData.data.nvic_data.forEach(item => {
-      MedischGemiddeldArray.push(item.aantal_medisch);
-      SpoedGemiddeldArray.push(item.aantal_spoed);
-      GeplandGemiddeldArray.push(item.aantal_gepland);
-    });
+    // Tweede request wordt geopend, query4 wordt verstuurd
+    const request4 = new XMLHttpRequest();
+    request4.open('POST', 'https://clean-garfish-69.hasura.app/v1/graphql');
+    request4.setRequestHeader('content-type', 'application/json');
+    request4.setRequestHeader('x-hasura-admin-secret', 'JL0Fh28uE4BqS09O0EhdnQnPQ6SJSyB0LwEXd6eNpktZpR9D0qMEDd7EtOgObty4');
+    request4.send(query4);
 
-    // Dan worden ze hier opgesplitst in 2021 en 2022
-    const MedischArray2021 = MedischGemiddeldArray.slice(0, 31);
-    const MedischArray2022 = MedischGemiddeldArray.slice(31, 62);
-    const SpoedArray2021 = SpoedGemiddeldArray.slice(0, 31);
-    const SpoedArray2022 = SpoedGemiddeldArray.slice(31, 62);
-    const GeplandArray2021 = GeplandGemiddeldArray.slice(0, 31);
-    const GeplandArray2022 = GeplandGemiddeldArray.slice(31, 62);
+    // Alle type opnames worden in hun eigen array gezet
+    request4.onload = function() {
+      const referentieGemiddeldeOpnametypesData = JSON.parse(request4.response);
+      referentieGemiddeldeOpnametypesData.data.nvic_data.forEach(item => {
+        MedischGemiddeldArray.push(item.aantal_medisch);
+        SpoedGemiddeldArray.push(item.aantal_spoed);
+        GeplandGemiddeldArray.push(item.aantal_gepland);
+      });
 
-    // En worden hier de gemiddelde aantallen van de opnames met dat type berekend en in hun eigen array gezet
-    for (let i = 0; i < MedischArray2021.length; i++) {
-      MedischGemiddeldArray[i] = (MedischArray2021[i] + MedischArray2022[i]) / 2;
-      SpoedGemiddeldArray[i] = (SpoedArray2021[i] + SpoedArray2022[i]) / 2;
-      GeplandGemiddeldArray[i] = (GeplandArray2021[i] + GeplandArray2022[i]) / 2;
-    };
+      // Dan worden ze hier opgesplitst in 2021 en 2022
+      const MedischArray2021 = MedischGemiddeldArray.slice(0, 31);
+      const MedischArray2022 = MedischGemiddeldArray.slice(31, 62);
+      const SpoedArray2021 = SpoedGemiddeldArray.slice(0, 31);
+      const SpoedArray2022 = SpoedGemiddeldArray.slice(31, 62);
+      const GeplandArray2021 = GeplandGemiddeldArray.slice(0, 31);
+      const GeplandArray2022 = GeplandGemiddeldArray.slice(31, 62);
 
-    // Roept de functie aan om de grafiek te maken. Meegegeven zijn de arrays met aantallen opnames van elk type per dag in 2023 en de gecombineerde referentie aantallen uit 2021/2022 
-    maakMaandGrafiekOpnametypes(MedischArray, SpoedArray, GeplandArray, MedischGemiddeldArray, SpoedGemiddeldArray, GeplandGemiddeldArray);
+      // En worden hier de gemiddelde aantallen van de opnames met dat type berekend en in hun eigen array gezet
+      for (let i = 0; i < MedischArray2021.length; i++) {
+        MedischGemiddeldArray[i] = (MedischArray2021[i] + MedischArray2022[i]) / 2;
+        SpoedGemiddeldArray[i] = (SpoedArray2021[i] + SpoedArray2022[i]) / 2;
+        GeplandGemiddeldArray[i] = (GeplandArray2021[i] + GeplandArray2022[i]) / 2;
+      };
+
+      // Roept de functie aan om de grafiek te maken. Meegegeven zijn de arrays met aantallen opnames van elk type per dag in 2023 en de gecombineerde referentie aantallen uit 2021/2022 
+      maakMaandGrafiekOpnametypes(MedischArray, SpoedArray, GeplandArray, MedischGemiddeldArray, SpoedGemiddeldArray, GeplandGemiddeldArray);
     };
   };
 };
@@ -212,7 +214,7 @@ function OpnamesLeeftijd() {
   let jaar7080 = [];
   let jaar80 = [];
 
-// Queries. Query5 de 
+  // Queries. Query5 de 
   const query5 = JSON.stringify({
     query: `{
       nvic_data(where: {datum: {_regex: "^2023-05"}}, order_by: {datum: asc}) {
@@ -314,7 +316,7 @@ function OpnamesLeeftijd() {
         const jaar80 = item.aantal_gepland_80plus + item.aantal_medisch_80plus + item.aantal_spoed_80plus;
         referentieData80Plus.push(jaar80);
       });
-      
+
       // Ik heb het weer teruggezet maar ik had ipv jaar40.slice etc referentieData40Min.slice. Want eigenlijk is jaar40 etc geen array. Ik weet niet waarom we dat een array hebben gemaakt
       // Daarna worden de aantallen opgesplitst in 2021 en 2022
       const data40Min2021 = jaar40.slice(0, 31);
@@ -415,7 +417,7 @@ maakMaandGrafiekOpnametypes = function(dataMedisch, dataSpoed, dataGepland, refe
     }],
     labels: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31']
   };
-  
+
   var maandOpnametypesChartOptions = {};
   var maandOpnametypesChartCtx = document.getElementById('maandOpnametypesChart').getContext('2d');
   const maandOpnametypesChart = new Chart(maandOpnametypesChartCtx, {
@@ -456,7 +458,7 @@ maakMaandGrafiekDiagnose = function() {
     }],
     labels: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31']
   };
-  
+
   var maandDiagnoseChartOptions = {};
   var maandDiagnoseChartCtx = document.getElementById('maandDiagnoseChart').getContext('2d');
   const maandDiagnoseChart = new Chart(maandDiagnoseChartCtx, {
