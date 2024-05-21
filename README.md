@@ -32,7 +32,7 @@ Er wordt een XMLHttpRequest geopend (request1.open) met een link naar onze Hasur
   request1.send(query1);
 </code>
 
-Wanneer de request wordt geladen (request1.onload) wordt het antwoord van de query (request1.response) opgeslagen in een variabele (opnameData). Daarna wordt de data verder verwerkt.
+Wanneer de request wordt geladen (request1.onload) wordt het antwoord van de query (request1.response) opgeslagen in een variabele (opnameData). Daarna wordt de data verder verwerkt. We zien hier dat er voor elke dag in mei 2023 een waarde wordt berekend door het optellen van alle soorten opnametypen. Daarna wordt die waarde opgeslagen in een array.
 <code>
   request1.onload = function() {
   const opnameData = JSON.parse(request1.response);
