@@ -538,15 +538,28 @@ maakMaandGrafiekOpnames = function(data, referentieData) {
     datasets: [{
       type: 'bar',
       label: 'Aantal opnames',
+      backgroundcolor: 'rgba(54,162,235, 0.8)',
+      bordercolor: 'rgb(54,162,235)',
       data: data
     }, {
       type: 'line',
       label: 'Gemiddeld aantal opnames van vorige jaren',
-      data: referentieData,
+      backgroundcolor: 'rgb(255,99,132)',
+      bordercolor: 'rgb(255,99,132)',
+      data: referentieData
     }],
     labels: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31']
   };
-  var maandChartOptions = {};
+  var maandChartOptions = {
+    scales: {
+      x: {
+        title:{color:'red', display: true, text: "VUL HIER TEXT IN VOOR X-AS TITEL"},
+      },
+      y: {
+        title:{color:'red', display: true, text: "VUL HIER TEXT IN VOOR Y-AS TITEL"}
+      },
+    },
+  };
   var maandChartCtx = document.getElementById('maandChart').getContext('2d');
 
   const maandChart = new Chart(maandChartCtx, {
@@ -564,43 +577,52 @@ maakMaandGrafiekOpnametypes = function(dataMedisch, dataSpoed, dataGepland, refe
       type: 'bar',
       label: 'Aantal Medische opnames',
       data: dataMedisch,
-      backgroundColor: 'rgba(174, 214, 241, 0.8)',
-      borderColor: 'rgba(174, 214, 241, 0.8)'
+      backgroundColor: 'rgba(54,162,235, 0.8)',
+      borderColor: 'rgba(54,162,235)'
     }, {
       type: 'bar',
       label: 'Aantal Spoed chirurgische opnames',
       data: dataSpoed,
-      backgroundColor: 'rgba(171, 235, 198, 0.5)',
-      borderColor: 'rgba(171, 235, 198, 0.5)'
+      backgroundColor: 'rgba(255,99,132, 0.8)',
+      borderColor: 'rgba(255,99,132)'
     }, {
       type: 'bar',
       label: 'Aantal Gepland chirurgische opnames',
       data: dataGepland,
-      backgroundColor: 'rgba(215, 189, 226, 0.5)',
-      borderColor: 'rgba(215, 189, 226, 0.5)'
+      backgroundColor: 'rgba(75,192,192, 0.8)',
+      borderColor: 'rgba(75,192,192)'
     }, {
       type: 'line',
       label: 'Aantal Medische opnames in vorige jaren',
       data: referentieDataMedisch,
-      backgroundColor: 'rgba(174, 214, 241)',
-      borderColor: 'rgba(174, 214, 241)'
+      backgroundColor: 'rgba(54,162,235)',
+      borderColor: 'rgba(54,162,235)'
     }, {
       type: 'line',
       label: 'Aantal Spoed chirurgische opnames in vorige jaren',
       data: referentieDataSpoed,
-      backgroundColor: 'rgba(171, 235, 198)',
-      borderColor: 'rgba(171, 235, 198)'
+      backgroundColor: 'rgba(255,99,132)',
+      borderColor: 'rgba(255,99,132)'
     }, {
       type: 'line',
       label: 'Aantal Gepland chirurgische opnames in vorige jaren',
       data: referentieDataGepland,
-      backgroundColor: 'rgba(215, 189, 226)',
-      borderColor: 'rgba(215, 189, 226)'
+      backgroundColor: 'rgba(75,192,192)',
+      borderColor: 'rgba(75,192,192)'
     }],
     labels: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31']
   };
 
-  var maandOpnametypesChartOptions = {};
+  var maandOpnametypesChartOptions = {
+    scales: {
+      x: {
+        title:{color:'red', display: true, text: "VUL HIER TEXT IN VOOR X-AS TITEL"},
+      },
+      y: {
+        title:{color:'red', display: true, text: "VUL HIER TEXT IN VOOR Y-AS TITEL"}
+      },
+    },
+  };
   var maandOpnametypesChartCtx = document.getElementById('maandOpnametypesChart').getContext('2d');
   const maandOpnametypesChart = new Chart(maandOpnametypesChartCtx, {
     data: maandOpnametypesChartData,
@@ -616,32 +638,53 @@ maakMaandGrafiekDiagnose = function() {
     datasets: [{
       type: 'bar',
       label: 'CAP',
-      data: [10, 20, 30, 40, 10, 20, 30, 40, 10, 20, 30, 40, 10, 20, 30, 40, 10, 20, 30, 40, 10, 20, 30, 40, 10, 20, 30, 40, 10, 20, 30]
+      backgroundcolor: 'rgba(54,162,235, 0.8)' ,
+      bordercolor: 'rgb(54,162,235)' ,
+      data: [68, 69, 68, 70, 65, 67, 73, 71, 72, 69, 64, 65, 68, 75, 70, 73, 72, 66, 63, 74, 76, 71, 69, 70, 79, 68, 76, 69, 79, 76, 63]
     }, {
       type: 'bar',
       label: 'OHCA',
-      data: [10, 20, 30, 40, 10, 20, 30, 40, 10, 20, 30, 40, 10, 20, 30, 40, 10, 20, 30, 40, 10, 20, 30, 40, 10, 20, 30, 40, 10, 20, 30]
+      backgroundcolor: 'rgba(255,99,132, 0.8)',
+      bordercolor: 'rgb(255,99,132)' ,
+      data: [10, 9, 12, 11, 13, 7, 8, 8, 12, 13, 11, 9, 14, 7, 10, 12, 9, 13, 14, 11, 10, 7, 13, 12, 10, 15, 11, 14, 12, 12, 9]
     }, {
       type: 'bar',
       label: 'Sespsis',
-      data: [10, 20, 30, 40, 10, 20, 30, 40, 10, 20, 30, 40, 10, 20, 30, 40, 10, 20, 30, 40, 10, 20, 30, 40, 10, 20, 30, 40, 10, 20, 30]
+      backgroundcolor: 'rgba(75,192,192, 0.8)' ,
+      bordercolor: 'rgb(75,192,192)',
+      data: [6, 8, 10, 7, 8 ,11, 6, 9, 10, 7, 8, 8, 12, 10, 9, 9, 11, 8, 10, 9, 7, 10, 9, 12, 13, 10, 8, 9, 9]
     }, {
       type: 'line',
       label: 'CAP vorige jaren',
-      data: [30, 40, 30, 33, 35, 43, 22, 23, 43, 23, 43, 35, 23, 34, 43, 33, 34, 24, 14, 30, 40, 30, 33, 35, 43, 22, 23, 43, 23, 43, 35],
+      backgroundcolor: 'rgb(54,162,235)',
+      bordercolor: 'rgb(54,162,235)' ,
+      data: [84, 70, 73, 73, 72, 74, 77, 71, 70, 76, 67, 69, 73, 75, 70, 75, 73, 72, 68, 73, 79, 70, 75, 73, 82, 72, 79, 69, 71, 78, 70],
     }, {
       type: 'line',
       label: 'OHCA vorige jaren',
-      data: [10, 20, 30, 40, 10, 20, 30, 40, 10, 20, 30, 40, 10, 20, 30, 40, 10, 20, 30, 40, 10, 20, 30, 40, 10, 20, 30, 40, 10, 20, 30]
+      backgroundcolor:'rgb(255,99,132)' ,
+      bordercolor: 'rgb(255,99,132)',
+      data: [20, 15, 18, 19, 16, 19, 15, 19, 16, 12, 20, 19, 17, 18, 16, 17, 22, 19, 15, 20, 17, 21, 18, 19, 19, 23, 21, 17, 14, 24, 13]
     }, {
       type: 'line',
       label: 'Sespsis vorige jaren',
-      data: [10, 20, 30, 40, 10, 20, 30, 40, 10, 20, 30, 40, 10, 20, 30, 40, 10, 20, 30, 40, 10, 20, 30, 40, 10, 20, 30, 40, 10, 20, 30]
+      backgroundcolor: 'rgb(75,192,192)',
+      bordercolor: 'rgb(75,192,192)',
+      data: [15, 16, 17, 12, 18, 15, 12, 16, 13, 15, 12, 14, 17, 16, 13, 15, 13, 18, 17, 15, 13, 16, 14, 19, 16, 15, 10, 17, 15, 19, 18]
     }],
     labels: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31']
   };
 
-  var maandDiagnoseChartOptions = {};
+  var maandDiagnoseChartOptions = {
+    scales: {
+      x: {
+        title:{color:'red', display: true, text: "VUL HIER TEXT IN VOOR X-AS TITEL"},
+      },
+      y: {
+        title:{color:'red', display: true, text: "VUL HIER TEXT IN VOOR Y-AS TITEL"}
+      },
+    },
+  };
   var maandDiagnoseChartCtx = document.getElementById('maandDiagnoseChart').getContext('2d');
   const maandDiagnoseChart = new Chart(maandDiagnoseChartCtx, {
     data: maandDiagnoseChartData,
@@ -659,72 +702,88 @@ maakMaandGrafiekOpnamesLeeftijd = function(referentieData40Min, referentieData40
       type: 'line',
       label: 'gem. 18-40 Jaar',
       data: referentieData40Min,
-      backgroundColor: '#E6B0AA',
-      borderColor: '#E6B0AA'
+      backgroundColor: 'rgb(54,162,235)',
+      borderColor: 'rgb(54,162,235)'
     }, {
       type: 'line',
       label: 'gem. 40-50 Jaar',
       data: referentieData4050,
-      backgroundColor: '#AED6F1',
-      borderColor: '#AED6F1'
+      backgroundColor: 'rgb(255,99,132)',
+      borderColor: 'rgb(255,99,132)'
     }, {
       type: 'line',
       label: 'gem. 50-60 Jaar',
       data: referentieData5060,
-      backgroundColor: '#D5DBDB',
-      borderColor: '#D5DBDB'
+      backgroundColor: 'rgb(75,192,192)',
+      borderColor: 'rgb(75,192,192)'
     }, {
       type: 'line',
       label: 'gem. 60-70 Jaar',
       data: referentieData6070,
-      backgroundColor: '#FAD7A0',
-      borderColor: '#FAD7A0'
+      backgroundColor: 'rgb(255,159,64)',
+      borderColor: 'rgb(255,159,64)'
     }, {
       type: 'line',
       label: 'gem. 70-80 Jaar',
       data: referentieData7080,
-      backgroundColor: '#D7BDE2',
-      borderColor: '#D7BDE2'
+      backgroundColor: 'rgb(153,102,255)',
+      borderColor: 'rgb(153,102,255)'
     }, {
       type: 'line',
       label: 'gem. 80+ Jaar',
       data: referentieData80Plus,
-      backgroundColor: '#ABEBC6',
-      borderColor: '#ABEBC6'
+      backgroundColor: 'rgb(255,205,86)',
+      borderColor: 'rgb(255,205,86)'
     }, {
       type: 'bar',
       label: '18-40 Jaar',
       data: data40Min,
-      backgroundColor: 'rgba(230, 176, 170, 0.5)'
+      backgroundColor: 'rgba(54,162,235, 0.8)',
+      bordercolor: 'rgb(54,162,235)'
+
     }, {
       type: 'bar',
       label: '40-50 Jaar',
       data: data4050,
-      backgroundColor: 'rgba(174, 214, 241, 0.5)'
+      backgroundColor: 'rgba(255,99,132, 0.8)',
+      bordercolor: 'rgb(255,99,132)'
     }, {
       type: 'bar',
       label: '50-60 Jaar',
       data: data5060,
-      backgroundColor: 'rgba(213, 219, 219, 0.5)'
+      backgroundColor: 'rgba(75,192,192, 0.8)',
+      bordercolor: 'rgb(75,192,192)'
     }, {
       type: 'bar',
       label: '60-70 Jaar',
       data: data6070,
-      backgroundColor: 'rgba(250, 215, 160, 0.5)'
+      backgroundColor: 'rgba(255,159,64, 0.8)',
+      bordercolor: 'rgb(255,159,64)'
     }, {
       type: 'bar',
       label: '70-80 Jaar',
       data: data7080,
-      backgroundColor: 'rgba(215, 189, 226, 0.5)'
+      backgroundColor: 'rgba(153,102,255, 0.8)',
+      bordercolor: 'rgb(153,102,255)'
     }, {
       type: 'bar',
       label: '80+ Jaar',
       data: data80Plus,
-      backgroundColor: 'rgba(171, 235, 198, 0.5)'
+      backgroundColor: 'rgba(255,205,86, 0.8)',
+      bordercolor: 'rgb(255,205,86)'
     }],
     labels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]
   };
-  var maandGrafiekOpnamesLeeftijdOptions = {}
+  var maandGrafiekOpnamesLeeftijdOptions = {
+    scales: {
+      x: {
+        title:{color:'red', display: true, text: "VUL HIER TEXT IN VOOR X-AS TITEL"},
+      },
+      y: {
+        title:{color:'red', display: true, text: "VUL HIER TEXT IN VOOR Y-AS TITEL"}
+      },
+    },
+  }
   var maandChartCtx = document.getElementById('leeftijdOpnames').getContext('2d');
   const leeftijdOpnames = new Chart(maandChartCtx, {
     data: maandGrafiekOpnamesLeeftijd,
@@ -741,11 +800,11 @@ maakGrafiekMedischeLeeftijd = function(medischeLeeftijdData, referentieMedischeL
     datasets: [{
       label: ['mei 2023'],
       data: medischeLeeftijdData,
-      backgroundColor: ['#36a2eb', '#ff6384', 'orange', '#ffce56', '#39e598', '#cc65fe']
+      backgroundColor: ['rgb(54,162,235)', 'rgb(255,99,132)', 'rgb(75,192,192)', 'rgb(255,159,64)', 'rgb(153,102,255)', 'rgb(255,205,86)']
     }, {
       label: ['gem. mei 2021/2022'],
       data: referentieMedischeLeeftijdData,
-      backgroundColor: ['#36a2eb', '#ff6384', 'orange', '#ffce56', '#39e598', '#cc65fe']
+      backgroundColor: ['rgb(54,162,235)', 'rgb(255,99,132)', 'rgb(75,192,192)', 'rgb(255,159,64)', 'rgb(153,102,255)', 'rgb(255,205,86)']
     }]
   };
   var medischeLeeftijdOptions = {
@@ -773,11 +832,11 @@ maakGrafiekSpoedLeeftijd = function(spoedeLeeftijdData, referentieSpoedeLeeftijd
     datasets: [{
       label: ['mei 2023'],
       data: spoedeLeeftijdData,
-      backgroundColor: ['#36a2eb', '#ff6384', 'orange', '#ffce56', '#39e598', '#cc65fe']
+      backgroundColor: ['rgb(54,162,235)', 'rgb(255,99,132)', 'rgb(75,192,192)', 'rgb(255,159,64)', 'rgb(153,102,255)', 'rgb(255,205,86)']
     }, {
       label: ['gem. mei 2021/2022'],
       data: referentieSpoedeLeeftijdData,
-      backgroundColor: ['#36a2eb', '#ff6384', 'orange', '#ffce56', '#39e598', '#cc65fe']
+      backgroundColor: ['rgb(54,162,235)', 'rgb(255,99,132)', 'rgb(75,192,192)', 'rgb(255,159,64)', 'rgb(153,102,255)', 'rgb(255,205,86)']
     }]
   };
   var spoedLeeftijdOptions = {
@@ -805,11 +864,11 @@ maakGrafiekGeplandeLeeftijd = function(geplandeLeeftijdData, referentieGeplandeL
     datasets: [{
       label: ['mei 2023'],
       data: geplandeLeeftijdData,
-      backgroundColor: ['#36a2eb', '#ff6384', 'orange', '#ffce56', '#39e598', '#cc65fe']
+      backgroundColor: ['rgb(54,162,235)', 'rgb(255,99,132)', 'rgb(75,192,192)', 'rgb(255,159,64)', 'rgb(153,102,255)', 'rgb(255,205,86)']
     }, {
       label: ['gem. mei 2021/2022'],
       data: referentieGeplandeLeeftijdData,
-      backgroundColor: ['#36a2eb', '#ff6384', 'orange', '#ffce56', '#39e598', '#cc65fe']
+      backgroundColor: ['rgb(54,162,235)', 'rgb(255,99,132)', 'rgb(75,192,192)', 'rgb(255,159,64)', 'rgb(153,102,255)', 'rgb(255,205,86)']
     }]
   };
   var geplandLeeftijdOptions = {

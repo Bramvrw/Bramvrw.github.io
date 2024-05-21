@@ -22,34 +22,8 @@ function Jaar() {
 // Deze functie haalt data over het totale aantal IC opnames uit 2021-2023 op uit de database en maakt een grafiek van deze data.
 opnamesMaand = function() {
   // Specificatie van arrays en variabelen
-  let opnamesArray = [];
-  let referentieOpnamesArray = [];
-
-  var januariOpnameData = 0;
-  var februariOpnameData = 0;
-  var maartOpnameData = 0;
-  var aprilOpnameData = 0;
-  var meiOpnameData = 0;
-  var juniOpnameData = 0;
-  var juliOpnameData = 0;
-  var augustusOpnameData = 0;
-  var septemberOpnameData = 0;
-  var oktoberOpnameData = 0;
-  var novemberOpnameData = 0;
-  var decemberOpnameData = 0;
-
-  var referentieJanuariOpnameData = 0;
-  var referentieFebruariOpnameData = 0;
-  var referentieMaartOpnameData = 0;
-  var referentieAprilOpnameData = 0;
-  var referentieMeiOpnameData = 0;
-  var referentieJuniOpnameData = 0;
-  var referentieJuliOpnameData = 0;
-  var referentieAugustusOpnameData = 0;
-  var referentieSeptemberOpnameData = 0;
-  var referentieOktoberOpnameData = 0;
-  var referentieNovemberOpnameData = 0;
-  var referentieDecemberOpnameData = 0;
+  let maandelijkseOpnames = Array(12).fill(0);
+  let referentieMaandelijkseOpnames = Array(12).fill(0);
 
   //Queries. 
   const query1 = JSON.stringify({
@@ -89,23 +63,12 @@ opnamesMaand = function() {
   request1.onload = function() {
     const opnameData = JSON.parse(request1.response);
     opnameData.data.nvic_data.forEach(item => {
-      if (item.datum.includes("-01-")) { januariOpnameData += item.aantal_gepland + item.aantal_medisch + item.aantal_spoed; }
-      else if (item.datum.includes("-02-")) { februariOpnameData += item.aantal_gepland + item.aantal_medisch + item.aantal_spoed; }
-      else if (item.datum.includes("-03-")) { maartOpnameData += item.aantal_gepland + item.aantal_medisch + item.aantal_spoed; }
-      else if (item.datum.includes("-04-")) { aprilOpnameData += item.aantal_gepland + item.aantal_medisch + item.aantal_spoed; }
-      else if (item.datum.includes("-05-")) { meiOpnameData += item.aantal_gepland + item.aantal_medisch + item.aantal_spoed; }
-      else if (item.datum.includes("-06-")) { juniOpnameData += item.aantal_gepland + item.aantal_medisch + item.aantal_spoed; }
-      else if (item.datum.includes("-07-")) { juliOpnameData += item.aantal_gepland + item.aantal_medisch + item.aantal_spoed; }
-      else if (item.datum.includes("-08-")) { augustusOpnameData += item.aantal_gepland + item.aantal_medisch + item.aantal_spoed; }
-      else if (item.datum.includes("-09-")) { septemberOpnameData += item.aantal_gepland + item.aantal_medisch + item.aantal_spoed; }
-      else if (item.datum.includes("-10-")) { oktoberOpnameData += item.aantal_gepland + item.aantal_medisch + item.aantal_spoed; }
-      else if (item.datum.includes("-11-")) { novemberOpnameData += item.aantal_gepland + item.aantal_medisch + item.aantal_spoed; }
-      else { decemberOpnameData += item.aantal_gepland + item.aantal_medisch + item.aantal_spoed; }
+      const datum = new Date(item.datum);
+      const maandIndex = datum.getMonth();
+      
+      maandelijkseOpnames[maandIndex] += item.aantal_gepland + item.aantal_medisch + item.aantal_spoed;
     });
-
-    // Hier worden de opgetelde waardes op volgorde aan de array toegevoegd
-    opnamesArray.push(januariOpnameData, februariOpnameData, maartOpnameData, aprilOpnameData, meiOpnameData, juniOpnameData, juliOpnameData, augustusOpnameData, septemberOpnameData, oktoberOpnameData, novemberOpnameData, decemberOpnameData);
-
+    
     // Tweede request wordt geopend, query2 wordt verstuurd
     const request2 = new XMLHttpRequest();
     request2.open('POST', 'https://clean-garfish-69.hasura.app/v1/graphql');
@@ -119,26 +82,15 @@ opnamesMaand = function() {
 
       // Weer wordt de data gefilterd op maand en worden de aantallen geteld
       referentieOpnameData.data.nvic_data.forEach(item => {
-        if (item.datum.includes("-01-")) { referentieJanuariOpnameData += item.aantal_gepland + item.aantal_medisch + item.aantal_spoed; }
-        else if (item.datum.includes("-02-")) { referentieFebruariOpnameData += item.aantal_gepland + item.aantal_medisch + item.aantal_spoed; }
-        else if (item.datum.includes("-03-")) { referentieMaartOpnameData += item.aantal_gepland + item.aantal_medisch + item.aantal_spoed; }
-        else if (item.datum.includes("-04-")) { referentieAprilOpnameData += item.aantal_gepland + item.aantal_medisch + item.aantal_spoed; }
-        else if (item.datum.includes("-05-")) { referentieMeiOpnameData += item.aantal_gepland + item.aantal_medisch + item.aantal_spoed; }
-        else if (item.datum.includes("-06-")) { referentieJuniOpnameData += item.aantal_gepland + item.aantal_medisch + item.aantal_spoed; }
-        else if (item.datum.includes("-07-")) { referentieJuliOpnameData += item.aantal_gepland + item.aantal_medisch + item.aantal_spoed; }
-        else if (item.datum.includes("-08-")) { referentieAugustusOpnameData += item.aantal_gepland + item.aantal_medisch + item.aantal_spoed; }
-        else if (item.datum.includes("-09-")) { referentieSeptemberOpnameData += item.aantal_gepland + item.aantal_medisch + item.aantal_spoed; }
-        else if (item.datum.includes("-10-")) { referentieOktoberOpnameData += item.aantal_gepland + item.aantal_medisch + item.aantal_spoed; }
-        else if (item.datum.includes("-11-")) { referentieNovemberOpnameData += item.aantal_gepland + item.aantal_medisch + item.aantal_spoed; }
-        else { referentieDecemberOpnameData += item.aantal_gepland + item.aantal_medisch + item.aantal_spoed; }
+        const datum = new Date(item.datum);
+        const maandIndex = datum.getMonth();
+        referentieMaandelijkseOpnames[maandIndex] += item.aantal_gepland + item.aantal_medisch + item.aantal_spoed;
       });
 
       // Hier worden de opgetelde waardes op volgorde aan de array toegevoegd nadat ze door 2 zijn gedeeld vanwege de twee jaar aan data die we als referentie gebruiken
-      referentieOpnamesArray.push(referentieJanuariOpnameData / 2, referentieFebruariOpnameData / 2, referentieMaartOpnameData / 2, referentieAprilOpnameData / 2, referentieMeiOpnameData / 2, referentieJuniOpnameData / 2, referentieJuliOpnameData / 2, referentieAugustusOpnameData / 2, referentieSeptemberOpnameData / 2, referentieOktoberOpnameData / 2, referentieNovemberOpnameData / 2, referentieDecemberOpnameData / 2);
+      referentieMaandelijkseOpnames = referentieMaandelijkseOpnames.map(x => x / 2);
+      maakJaarGrafiekOpnames(maandelijkseOpnames, referentieMaandelijkseOpnames);
     };
-
-    // Als laatste wordt de functie aangeroepen om de grafiek te maken
-    maakJaarGrafiekOpnames(opnamesArray, referentieOpnamesArray);
   };
 };
 
@@ -146,49 +98,12 @@ opnamesMaand = function() {
 // Deze functie maakt een overzicht van alle opnames per opnametype per maand in 2023, ten opzichte van de opnames per maand in 2021 en 2022.
 opnametypesMaand = function() {
   // Specificatie van arrays en variabelen
-  let medischArray = [];
-  let spoedArray = [];
-  let geplandArray = [];
-  let referentieMedischArray = [];
-  let referentieSpoedArray = [];
-  let referentieGeplandArray = [];
-
-  var janMedisch = 0;
-  var febMedisch = 0;
-  var marMedisch = 0;
-  var aprMedisch = 0;
-  var meiMedisch = 0;
-  var junMedisch = 0;
-  var julMedisch = 0;
-  var augMedisch = 0;
-  var sepMedisch = 0;
-  var oktMedisch = 0;
-  var novMedisch = 0;
-  var decMedisch = 0;
-  var janSpoed = 0;
-  var febSpoed = 0;
-  var marSpoed = 0;
-  var aprSpoed = 0;
-  var meiSpoed = 0;
-  var junSpoed = 0;
-  var julSpoed = 0;
-  var augSpoed = 0;
-  var sepSpoed = 0;
-  var oktSpoed = 0;
-  var novSpoed = 0;
-  var decSpoed = 0;
-  var janGepland = 0;
-  var febGepland = 0;
-  var marGepland = 0;
-  var aprGepland = 0;
-  var meiGepland = 0;
-  var junGepland = 0;
-  var julGepland = 0;
-  var augGepland = 0;
-  var sepGepland = 0;
-  var oktGepland = 0;
-  var novGepland = 0;
-  var decGepland = 0;
+  let medischArray = Array(12).fill(0);
+  let spoedArray = Array(12).fill(0);
+  let geplandArray = Array(12).fill(0);
+  let referentieMedischArray = Array(12).fill(0);
+  let referentieSpoedArray = Array(12).fill(0);
+  let referentieGeplandArray = Array(12).fill(0);
 
   //Queries.
   const query3 = JSON.stringify({
@@ -228,74 +143,13 @@ opnametypesMaand = function() {
   request3.onload = function() {
     const opnametypesData = JSON.parse(request3.response);
     opnametypesData.data.nvic_data.forEach(item => {
-      if (item.datum.includes("-01-")) {
-        janMedisch += item.aantal_medisch;
-        janSpoed += item.aantal_spoed;
-        janGepland += item.aantal_gepland;
-      }
-      else if (item.datum.includes("-02-")) {
-        febMedisch += item.aantal_medisch;
-        febSpoed += item.aantal_spoed;
-        febGepland += item.aantal_gepland;
-      }
-      else if (item.datum.includes("-03-")) {
-        marMedisch += item.aantal_medisch;
-        marSpoed += item.aantal_spoed;
-        marGepland += item.aantal_gepland;
-      }
-      else if (item.datum.includes("-04-")) {
-        aprMedisch += item.aantal_medisch;
-        aprSpoed += item.aantal_spoed;
-        aprGepland += item.aantal_gepland;
-      }
-      else if (item.datum.includes("-05-")) {
-        meiMedisch += item.aantal_medisch;
-        meiSpoed += item.aantal_spoed;
-        meiGepland += item.aantal_gepland;
-      }
-      else if (item.datum.includes("-06-")) {
-        junMedisch += item.aantal_medisch;
-        junSpoed += item.aantal_spoed;
-        junGepland += item.aantal_gepland;
-      }
-      else if (item.datum.includes("-07-")) {
-        julMedisch += item.aantal_medisch;
-        julSpoed += item.aantal_spoed;
-        julGepland += item.aantal_gepland;
-      }
-      else if (item.datum.includes("-08-")) {
-        augMedisch += item.aantal_medisch;
-        augSpoed += item.aantal_spoed;
-        augGepland += item.aantal_gepland;
-      }
-      else if (item.datum.includes("-09-")) {
-        sepMedisch += item.aantal_medisch;
-        sepSpoed += item.aantal_spoed;
-        sepGepland += item.aantal_gepland;
-      }
-      else if (item.datum.includes("-10-")) {
-        oktMedisch += item.aantal_medisch;
-        oktSpoed += item.aantal_spoed;
-        oktGepland += item.aantal_gepland;
-      }
-      else if (item.datum.includes("-11-")) {
-        novMedisch += item.aantal_medisch;
-        novSpoed += item.aantal_spoed;
-        novGepland += item.aantal_gepland;
-      }
-      else {
-        decMedisch += item.aantal_medisch;
-        decSpoed += item.aantal_spoed;
-        decGepland += item.aantal_gepland;
-      }
+      const datum = new Date(item.datum);
+      const maandIndex = datum.getMonth();
+      
+      medischArray[maandIndex] += item.aantal_medisch;
+      spoedArray[maandIndex] += item.aantal_spoed;
+      geplandArray[maandIndex] += item.aantal_gepland;
     });
-
-    // Daarna worden de waardes op volgorde aan de arrays toegevoegd
-    medischArray.push(janMedisch, febMedisch, marMedisch, aprMedisch, meiMedisch, junMedisch, julMedisch, augMedisch, sepMedisch, oktMedisch, novMedisch, decMedisch);
-
-    spoedArray.push(janSpoed, febSpoed, marSpoed, aprSpoed, meiSpoed, junSpoed, julSpoed, augSpoed, sepSpoed, oktSpoed, novSpoed, decSpoed);
-
-    geplandArray.push(janGepland, febGepland, marGepland, aprGepland, meiGepland, junGepland, julGepland, augGepland, sepGepland, oktGepland, novGepland, decGepland);
   };
 
   // Tweede request wordt geopend, query4 wordt verstuurd
@@ -308,172 +162,30 @@ opnametypesMaand = function() {
   // De data van 2021 en 2022 wordt hier verwerkt door te filteren op maand en vervolgens de aantallen opnames voor elke soort opname bij elkaar op te tellen.
   request4.onload = function() {
     const referentieOpnametypeData = JSON.parse(request4.response);
-
-    // Deze waardes worden gereset op opnieuw te gebruiken
-    var janMedisch = 0;
-    var febMedisch = 0;
-    var marMedisch = 0;
-    var aprMedisch = 0;
-    var meiMedisch = 0;
-    var junMedisch = 0;
-    var julMedisch = 0;
-    var augMedisch = 0;
-    var sepMedisch = 0;
-    var oktMedisch = 0;
-    var novMedisch = 0;
-    var decMedisch = 0;
-    var janSpoed = 0;
-    var febSpoed = 0;
-    var marSpoed = 0;
-    var aprSpoed = 0;
-    var meiSpoed = 0;
-    var junSpoed = 0;
-    var julSpoed = 0;
-    var augSpoed = 0;
-    var sepSpoed = 0;
-    var oktSpoed = 0;
-    var novSpoed = 0;
-    var decSpoed = 0;
-    var janGepland = 0;
-    var febGepland = 0;
-    var marGepland = 0;
-    var aprGepland = 0;
-    var meiGepland = 0;
-    var junGepland = 0;
-    var julGepland = 0;
-    var augGepland = 0;
-    var sepGepland = 0;
-    var oktGepland = 0;
-    var novGepland = 0;
-    var decGepland = 0;
-
+ 
     referentieOpnametypeData.data.nvic_data.forEach(item => {
-      if (item.datum.includes("-01-")) {
-        janMedisch += item.aantal_medisch;
-        janSpoed += item.aantal_spoed;
-        janGepland += item.aantal_gepland;
-      }
-      else if (item.datum.includes("-02-")) {
-        febMedisch += item.aantal_medisch;
-        febSpoed += item.aantal_spoed;
-        febGepland += item.aantal_gepland;
-      }
-      else if (item.datum.includes("-03-")) {
-        marMedisch += item.aantal_medisch;
-        marSpoed += item.aantal_spoed;
-        marGepland += item.aantal_gepland;
-      }
-      else if (item.datum.includes("-04-")) {
-        aprMedisch += item.aantal_medisch;
-        aprSpoed += item.aantal_spoed;
-        aprGepland += item.aantal_gepland;
-      }
-      else if (item.datum.includes("-05-")) {
-        meiMedisch += item.aantal_medisch;
-        meiSpoed += item.aantal_spoed;
-        meiGepland += item.aantal_gepland;
-      }
-      else if (item.datum.includes("-06-")) {
-        junMedisch += item.aantal_medisch;
-        junSpoed += item.aantal_spoed;
-        junGepland += item.aantal_gepland;
-      }
-      else if (item.datum.includes("-07-")) {
-        julMedisch += item.aantal_medisch;
-        julSpoed += item.aantal_spoed;
-        julGepland += item.aantal_gepland;
-      }
-      else if (item.datum.includes("-08-")) {
-        augMedisch += item.aantal_medisch;
-        augSpoed += item.aantal_spoed;
-        augGepland += item.aantal_gepland;
-      }
-      else if (item.datum.includes("-09-")) {
-        sepMedisch += item.aantal_medisch;
-        sepSpoed += item.aantal_spoed;
-        sepGepland += item.aantal_gepland;
-      }
-      else if (item.datum.includes("-10-")) {
-        oktMedisch += item.aantal_medisch;
-        oktSpoed += item.aantal_spoed;
-        oktGepland += item.aantal_gepland;
-      }
-      else if (item.datum.includes("-11-")) {
-        novMedisch += item.aantal_medisch;
-        novSpoed += item.aantal_spoed;
-        novGepland += item.aantal_gepland;
-      }
-      else {
-        decMedisch += item.aantal_medisch;
-        decSpoed += item.aantal_spoed;
-        decGepland += item.aantal_gepland;
-      }
+      const datum = new Date(item.datum);
+      const maandIndex = datum.getMonth();
+      
+      referentieMedischArray[maandIndex] += item.aantal_medisch;
+      referentieSpoedArray[maandIndex] += item.aantal_spoed;
+      referentieGeplandArray[maandIndex] += item.aantal_gepland;
     });
 
     // Hier worden alle waardes in correcte volgorde aan de juiste arrays toegevoegd
-    referentieMedischArray.push(janMedisch / 2, febMedisch / 2, marMedisch / 2, aprMedisch / 2, meiMedisch / 2, junMedisch / 2, julMedisch / 2, augMedisch / 2, sepMedisch / 2, oktMedisch / 2, novMedisch / 2, decMedisch / 2);
-
-    referentieSpoedArray.push(janSpoed / 2, febSpoed / 2, marSpoed / 2, aprSpoed / 2, meiSpoed / 2, junSpoed / 2, julSpoed / 2, augSpoed / 2, sepSpoed / 2, oktSpoed / 2, novSpoed / 2, decSpoed / 2);
-
-    referentieGeplandArray.push(janGepland / 2, febGepland / 2, marGepland / 2, aprGepland / 2, meiGepland / 2, junGepland / 2, julGepland / 2, augGepland / 2, sepGepland / 2, oktGepland / 2, novGepland / 2, decGepland / 2);
-
+      referentieMedischArray = referentieMedischArray.map(x => x / 2);
+      referentieSpoedArray = referentieSpoedArray.map(x => x / 2);
+      referentieGeplandArray = referentieGeplandArray.map(x => x / 2);
+    // Als laatste wordt de data van de arrays doorgegeven aan deze functie om hier een grafiek van te maken
+    maakJaarGrafiekOpnametypes(medischArray, spoedArray, geplandArray, referentieMedischArray, referentieSpoedArray, referentieGeplandArray);
   };
-
-  // Als laatste wordt de data van de arrays doorgegeven aan deze functie om hier een grafiek van te maken
-  maakJaarGrafiekOpnametypes(medischArray, spoedArray, geplandArray, referentieMedischArray, referentieSpoedArray, referentieGeplandArray);
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // DATA LEEFTIJDSCATEGORIEN
-// Deze functie ...
+// Deze functie maakt een grafiek van de data per leeftijdscategorie per maand over heel 2023. Met een gemiddelde aantal opnames per maand per leeftijdscategorie van 2o21 en 2022.
 function OpnamesLeeftijdMaand() {
+   // op deze manier maak je een array met precies 12 elementen, allemaal ingesteld op 0. Hierdoor kun je direct waarden optellen bij specifieke indexen  waardoor je maandelijkseTotalen40Min[maandIndex] kan gebruiken om per maand het op te tellen en hoef je niet iedere maand los te coderen.
+  
   let maandelijkseTotalen40Min = Array(12).fill(0);
   let maandelijkseTotalen4050 = Array(12).fill(0);
   let maandelijkseTotalen5060 = Array(12).fill(0);
@@ -559,15 +271,6 @@ function OpnamesLeeftijdMaand() {
           maandelijkseTotalen7080[maandIndex] += item.aantal_gepland_70_80 + item.aantal_medisch_70_80 + item.aantal_spoed_70_80;
           maandelijkseTotalen80Plus[maandIndex] += item.aantal_gepland_80plus + item.aantal_medisch_80plus + item.aantal_spoed_80plus;
         });
-
-        // Log de maandelijkse totalen voor elke leeftijdscategorie
-        console.log('Onder 40:', maandelijkseTotalen40Min);
-        console.log('40-50:', maandelijkseTotalen4050);
-        console.log('50-60:', maandelijkseTotalen5060);
-        console.log('60-70:', maandelijkseTotalen6070);
-        console.log('70-80:', maandelijkseTotalen7080);
-        console.log('80+:', maandelijkseTotalen80Plus);
-      
     };
 
       const request6 = new XMLHttpRequest();
@@ -578,7 +281,6 @@ function OpnamesLeeftijdMaand() {
 
       request6.onload = function() {
           const leeftijdDataGem = JSON.parse(request6.response);
-          // Maak arrays voor elke leeftijdscategorie met 12 elementen voor elke maand
             leeftijdDataGem.data.nvic_data.forEach(item => {
             const datum = new Date(item.datum);
             const maandIndex = datum.getMonth(); // 0 voor januari, 1 voor februari, etc.
@@ -590,13 +292,7 @@ function OpnamesLeeftijdMaand() {
               referentieData7080[maandIndex] += item.aantal_gepland_70_80 + item.aantal_medisch_70_80 + item.aantal_spoed_70_80;
               referentieData80Plus[maandIndex] += item.aantal_gepland_80plus + item.aantal_medisch_80plus + item.aantal_spoed_80plus;
           });
-        console.log('Onder 40:', referentieData40Min);
-        console.log('40-50:', referentieData4050);
-        console.log('50-60:', referentieData5060);
-        console.log('60-70:', referentieData6070);
-        console.log('70-80:', referentieData7080);
-        console.log('80+:', referentieData80Plus);
-        
+//voor berekenen gemiddelde (map zorgt ervoor dat index 0 door 2 gedeeld kan worden, etc)
             referentieData40Min = referentieData40Min.map(x => x / 2);
             referentieData4050 = referentieData4050.map(x => x / 2);
             referentieData5060 = referentieData5060.map(x => x / 2);
@@ -604,59 +300,10 @@ function OpnamesLeeftijdMaand() {
             referentieData7080 = referentieData7080.map(x => x / 2);
             referentieData80Plus = referentieData80Plus.map(x => x / 2);
         
-          console.log('Onder 40:', referentieData40Min);
-          console.log('40-50:', referentieData4050);
-          console.log('50-60:', referentieData5060);
-          console.log('60-70:', referentieData6070);
-          console.log('70-80:', referentieData7080);
-          console.log('80+:', referentieData80Plus);
-
-
-
-          maakJaarGrafiekOpnamesLeeftijd(referentieData40Min, referentieData4050, referentieData5060, referentieData6070, referentieData7080, referentieData80Plus, maandelijkseTotalen40Min, maandelijkseTotalen4050, maandelijkseTotalen5060, maandelijkseTotalen6070, maandelijkseTotalen7080, maandelijkseTotalen80Plus);
+maakJaarGrafiekOpnamesLeeftijd(referentieData40Min, referentieData4050, referentieData5060, referentieData6070, referentieData7080, referentieData80Plus, maandelijkseTotalen40Min, maandelijkseTotalen4050, maandelijkseTotalen5060, maandelijkseTotalen6070, maandelijkseTotalen7080, maandelijkseTotalen80Plus);
         
       };
     } 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // DATA LEEFTIJDSVERDELING OVER OPNAMETYPES
 // Deze functie ...
@@ -865,7 +512,16 @@ maakJaarGrafiekOpnames = function(data, referentiedata) {
     labels: ['Januari', 'Februari', 'Maart', 'April', 'Mei', 'Juni', 'Juli', 'Augustus', 'September', 'Oktober', 'November', 'December']
   };
 
-  var jaarChartOptions = {};
+  var jaarChartOptions = {
+    scales: {
+      x: {
+        title:{color:'red', display: true, text: "VUL HIER TEXT IN VOOR X-AS TITEL"},
+      },
+      y: {
+        title:{color:'red', display: true, text: "VUL HIER TEXT IN VOOR Y-AS TITEL"}
+      },
+    },
+  };
   var jaarChartCtx = document.getElementById('jaarChart').getContext('2d');
   const jaarChart = new Chart(jaarChartCtx, {
     data: jaarChartData,
@@ -882,43 +538,52 @@ maakJaarGrafiekOpnametypes = function(medischData, spoedData, geplandData, refer
       type: 'bar',
       label: 'Aantal Medische opnames',
       data: medischData,
-      backgroundColor: 'rgba(174, 214, 241, 0.8)',
-      borderColor: 'rgba(174, 214, 241, 0.8)'
+      backgroundColor: 'rgb(54,162,235,0.5)',
+      borderColor: 'rgb(54,162,235)'
     }, {
       type: 'bar',
       label: 'Aantal Spoed opnames',
       data: spoedData,
-      backgroundColor: 'rgba(171, 235, 198, 0.8)',
-      borderColor: 'rgba(171, 235, 198, 0.8)'
+      backgroundColor: 'rgb(255,99,132,0.5)',
+      borderColor: 'rgb(255,99,132)'
     }, {
       type: 'bar',
       label: 'Aantal Geplande opnames',
       data: geplandData,
-      backgroundColor: 'rgba(215, 189, 226, 0.5)',
-      borderColor: 'rgba(215, 189, 226, 0.5)'
+      backgroundColor: 'rgb(255,159,64,0.5)',
+      borderColor: 'rgb(255,159,64)'
     }, {
       type: 'line',
       label: 'Aantal Medische opnames in vorige jaren',
       data: referentieMedischData,
-      backgroundColor: 'rgba(174, 214, 241)',
-      borderColor: 'rgba(174, 214, 241)'
+      backgroundColor: 'rgb(54,162,235)',
+      borderColor: 'rgb(54,162,235)'
     }, {
       type: 'line',
       label: 'Aantal Spoed opnames in vorige jaren',
       data: referentieSpoedData,
-      backgroundColor: 'rgba(171, 235, 198)',
-      borderColor: 'rgba(171, 235, 198)'
+      backgroundColor: 'rgb(255,99,132)',
+      borderColor: 'rgb(255,99,132)'
     }, {
       type: 'line',
       label: 'Aantal Geplande opnames in vorige jaren',
       data: referentieGeplandData,
-      backgroundColor: 'rgba(215, 189, 226)',
-      borderColor: 'rgba(215, 189, 226)'
+      backgroundColor: 'rgb(255,159,64)',
+      borderColor: 'rgb(255,159,64)'
     }],
     labels: ['Januari', 'Februari', 'Maart', 'April', 'Mei', 'Juni', 'Juli', 'Augustus', 'September', 'Oktober', 'November', 'December']
   };
 
-  var jaarOpnametypesChartOptions = {};
+  var jaarOpnametypesChartOptions = {
+    scales: {
+      x: {
+        title:{color:'red', display: true, text: "VUL HIER TEXT IN VOOR X-AS TITEL"},
+      },
+      y: {
+        title:{color:'red', display: true, text: "VUL HIER TEXT IN VOOR Y-AS TITEL"}
+      },
+    },
+  };
   var jaarOpnametypesChartCtx = document.getElementById('jaarOpnametypesChart').getContext('2d');
   const jaarOpnametypesChart = new Chart(jaarOpnametypesChartCtx, {
     data: jaarOpnametypesChartData,
@@ -934,32 +599,53 @@ maakJaarGrafiekDiagnose = function() {
     datasets: [{
       type: 'bar',
       label: 'CAP',
-      data: [2389, 2275, 2265, 2198, 2178, 2128, 2015, 2149, 2189, 2238, 2245, 2303]
+      data: [2389, 2275, 2265, 2198, 2178, 2128, 2015, 2149, 2189, 2238, 2245, 2303],
+      backgroundColor: 'rgb(54,162,235,0.5)',
+      borderColor: 'rgb(54,162,235)'
     }, {
       type: 'bar',
       label: 'OHCA',
-      data: [328, 356, 375, 345, 338, 321, 339, 348, 350, 347, 341, 343]
+      data: [328, 356, 375, 345, 338, 321, 339, 348, 350, 347, 341, 343],
+      backgroundColor: 'rgb(255,99,132,0.5)',
+      borderColor: 'rgb(255,99,132)'
     }, {
       type: 'bar',
       label: 'Sepsis',
-      data: [304, 287, 259, 253, 284, 299, 306, 289, 283, 291, 312, 319]
+      data: [304, 287, 259, 253, 284, 299, 306, 289, 283, 291, 312, 319],
+      backgroundColor: 'rgb(255,159,64,0.5)',
+      borderColor: 'rgb(255,159,64)'
     }, {
       type: 'line',
       label: 'CAP vorige jaren',
-      data: [2460, 2421, 2356, 2301, 2273, 2226, 2150, 2235, 2289, 2340, 2360, 2395]
+      data: [2460, 2421, 2356, 2301, 2273, 2226, 2150, 2235, 2289, 2340, 2360, 2395],
+      backgroundColor: 'rgb(54,162,235)',
+      borderColor: 'rgb(54,162,235)'
     }, {
       type: 'line',
       label: 'OHCA vorige jaren',
-      data: [548, 562, 553, 567, 558, 550, 547, 555, 558, 560, 552, 550]
+      data: [548, 562, 553, 567, 558, 550, 547, 555, 558, 560, 552, 550],
+      backgroundColor: 'rgb(255,99,132)',
+      borderColor: 'rgb(255,99,132)'
     }, {
       type: 'line',
       label: 'Sepsis vorige jaren',
-      data: [480, 473, 458, 452, 471, 476, 481, 470, 468, 474, 478, 482]
+      data: [480, 473, 458, 452, 471, 476, 481, 470, 468, 474, 478, 482],
+      backgroundColor: 'rgb(255,159,64)',
+      borderColor: 'rgb(255,159,64)'
     }],
     labels: ['Januari', 'Februari', 'Maart', 'April', 'Mei', 'Juni', 'Juli', 'Augustus', 'September', 'Oktober', 'November', 'December']
   };
 
-  var jaarDiagnoseChartOptions = {};
+  var jaarDiagnoseChartOptions = {
+    scales: {
+      x: {
+        title:{color:'red', display: true, text: "VUL HIER TEXT IN VOOR X-AS TITEL"},
+      },
+      y: {
+        title:{color:'red', display: true, text: "VUL HIER TEXT IN VOOR Y-AS TITEL"}
+      },
+    },
+  };
   var jaarDiagnoseChartCtx = document.getElementById('jaarDiagnoseChart').getContext('2d');
   const jaarDiagnoseChart = new Chart(jaarDiagnoseChartCtx, {
     data: jaarDiagnoseChartData,
@@ -969,172 +655,102 @@ maakJaarGrafiekDiagnose = function() {
   return jaarDiagnoseChart;
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 maakJaarGrafiekOpnamesLeeftijd = function(referentieData40Min, referentieData4050, referentieData5060, referentieData6070, referentieData7080, referentieData80Plus, maandelijkseTotalen40Min, maandelijkseTotalen4050, maandelijkseTotalen5060, maandelijkseTotalen6070, maandelijkseTotalen7080, maandelijkseTotalen80Plus) {
   var jaarGrafiekOpnamesLeeftijd = {
     datasets: [{
       type: 'line',
       label: 'gem. 18-40 Jaar',
       data: referentieData40Min,
-      backgroundColor: '#E6B0AA',
-      borderColor: '#E6B0AA'
+      backgroundColor: 'rgb(54,162,235)',
+      borderColor: 'rgb(54,162,235)'
     }, {
       type: 'line',
       label: 'gem. 40-50 Jaar',
       data: referentieData4050,
-      backgroundColor: '#AED6F1',
-      borderColor: '#AED6F1'
+      backgroundColor: 'rgb(255,99,132)',
+      borderColor: 'rgb(255,99,132)'
     }, {
       type: 'line',
       label: 'gem. 50-60 Jaar',
       data: referentieData5060,
-      backgroundColor: '#D5DBDB',
-      borderColor: '#D5DBDB'
+      backgroundColor: 'rgb(75,192,192)',
+      borderColor: 'rgb(75,192,192)'
     }, {
       type: 'line',
       label: 'gem. 60-70 Jaar',
       data: referentieData6070,
-      backgroundColor: '#FAD7A0',
-      borderColor: '#FAD7A0'
+      backgroundColor: 'rgb(255,159,64)',
+      borderColor: 'rgb(255,159,64)'
     }, {
       type: 'line',
       label: 'gem. 70-80 Jaar',
       data: referentieData7080,
-      backgroundColor: '#D7BDE2',
-      borderColor: '#D7BDE2'
+      backgroundColor: 'rgb(153,102,255)',
+      borderColor: 'rgb(153,102,255)'
     }, {
       type: 'line',
       label: 'gem. 80+ Jaar',
       data: referentieData80Plus,
-      backgroundColor: '#ABEBC6',
-      borderColor: '#ABEBC6'
+      backgroundColor: 'rgb(255,205,86)',
+      borderColor: 'rgb(255,205,86)'
     }, {
       type: 'bar',
       label: '18-40 Jaar',
       data: maandelijkseTotalen40Min,
-      backgroundColor: 'rgba(230, 176, 170, 0.5)'
+      backgroundColor: 'rgb(54,162,235, 0.5)',
+      borderColor: 'rgb(54,162,235)'
     }, {
       type: 'bar',
       label: '40-50 Jaar',
       data: maandelijkseTotalen4050,
-      backgroundColor: 'rgba(174, 214, 241, 0.5)'
+      backgroundColor: 'rgb(255,99,132, 0.5)',
+      borderColor: 'rgb(255,99,132)'
     }, {
       type: 'bar',
       label: '50-60 Jaar',
       data: maandelijkseTotalen5060,
-      backgroundColor: 'rgba(213, 219, 219, 0.5)'
+      backgroundColor: 'rgb(75,192,192, 0.8)',
+      bordeColor: 'rgb(75,192,192)'
     }, {
       type: 'bar',
       label: '60-70 Jaar',
       data: maandelijkseTotalen6070,
-      backgroundColor: 'rgba(250, 215, 160, 0.5)'
+      backgroundColor: 'rgb(255,159,64,0.5)',
+      borderColor: 'rgb(255,159,64)'
     }, {
       type: 'bar',
       label: '70-80 Jaar',
       data: maandelijkseTotalen7080,
-      backgroundColor: 'rgba(215, 189, 226, 0.5)'
+      backgroundColor: 'rgb(153,102,255, 0.5)',
+      borderColor: 'rgb(153,102,255)'
     }, {
       type: 'bar',
       label: '80+ Jaar',
       data: maandelijkseTotalen80Plus,
-      backgroundColor: 'rgba(171, 235, 198, 0.5)'
+      backgroundColor: 'rgb(255,205,86,0.5)',
+      borderColor: 'rgb(255,205,86)'
     }],
     labels: ['Januari', 'Februari', 'Maart', 'April', 'Mei', 'Juni', 'Juli', 'Augustus', 'September', 'Oktober', 'November', 'December']
   };
 
-  var jaarGrafiekOpnamesLeeftijdOptions = {};
+  var jaarGrafiekOpnamesLeeftijdOptions = {
+    scales: {
+      x: {
+        title:{color:'red', display: true, text: "VUL HIER TEXT IN VOOR X-AS TITEL"},
+      },
+      y: {
+        title:{color:'red', display: true, text: "VUL HIER TEXT IN VOOR Y-AS TITEL"}
+      },
+    },
+  };
   var jaarLeeftijdChartCtx = document.getElementById('jaarLeeftijdChart').getContext('2d');
   const jaarLeeftijdChart = new Chart(jaarLeeftijdChartCtx, {
     data: jaarGrafiekOpnamesLeeftijd,
-    type: 'bar', // Corrected type to bar for mixed chart
+    type: 'bar',
     options: jaarGrafiekOpnamesLeeftijdOptions,
   });
   return jaarLeeftijdChart;
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 maakICGrafiek = function() {
@@ -1142,20 +758,35 @@ maakICGrafiek = function() {
     datasets: [{
       type: 'line',
       label: '2023',
-      data: [1.6, 1.6, 1.5, 1.4, 1.3, 1.2, 1.2, 1.3, 1.5, 1.5, 1.4, 1.6]
+      data: [1.6, 1.6, 1.5, 1.4, 1.3, 1.2, 1.2, 1.3, 1.5, 1.5, 1.4, 1.6],
+      backgroundColor: 'rgb(54,162,235)',
+      borderColor: 'rgb(54,162,235)'
     }, {
       type: 'line',
       label: '2022',
-      data: [1.7, 1.6, 1.5, 1.5, 1.4, 1.3, 1.2, 1.2, 1.4, 1.4, 1.5, 1.5]
+      data: [1.7, 1.6, 1.5, 1.5, 1.4, 1.3, 1.2, 1.2, 1.4, 1.4, 1.5, 1.5],
+      backgroundColor: 'rgb(255,99,132)',
+      borderColor: 'rgb(255,99,132)'
     }, {
       type: 'line',
       label: '2021',
-      data: [1.9, 1.8, 1.8, 1.7, 1.7, 1.6, 1.5, 1.6, 1.7, 1.8, 1.9, 1.8]
+      data: [1.9, 1.8, 1.8, 1.7, 1.7, 1.6, 1.5, 1.6, 1.7, 1.8, 1.9, 1.8],
+    backgroundColor: 'rgb(75,192,192)',
+    borderColor: 'rgb(75,192,192)'
     }],
     labels: ['Januari', 'Februari', 'Maart', 'April', 'Mei', 'Juni', 'Juli', 'Augustus', 'September', 'Oktober', 'November', 'December']
   };
 
-  var jaarICChartOptions = {};
+  var jaarICChartOptions = {
+    scales: {
+      x: {
+        title:{color:'red', display: true, text: "VUL HIER TEXT IN VOOR X-AS TITEL"},
+      },
+      y: {
+        title:{color:'red', display: true, text: "VUL HIER TEXT IN VOOR Y-AS TITEL"}
+      },
+    },
+  };
   var jaarICChartCtx = document.getElementById('jaarICChart').getContext('2d');
   const jaarICChart = new Chart(jaarICChartCtx, {
     data: jaarICChartData,
@@ -1172,11 +803,23 @@ maakGrafiekMedischeLeeftijd = function(medischeLeeftijdData, referentieMedischeL
     datasets: [{
       label: ['2023'],
       data: medischeLeeftijdData,
-      backgroundColor: ['#36a2eb', '#ff6384', 'orange', '#ffce56', '#39e598', '#cc65fe']
+      backgroundColor: ['rgb(54,162,235)',
+                        'rgb(255,99,132)',
+                        'rgb(75,192,192)',
+                        'rgb(255,159,64)',
+                        'rgb(153,102,255)',
+                        'rgb(255,205,86)',
+                        'rgb(201,203,207)']
     }, {
       label: ['gem. 2021/2022'],
       data: referentieMedischeLeeftijdData,
-      backgroundColor: ['#36a2eb', '#ff6384', 'orange', '#ffce56', '#39e598', '#cc65fe']
+      backgroundColor: ['rgb(54,162,235)',
+                       'rgb(255,99,132)',
+                       'rgb(75,192,192)',
+                       'rgb(255,159,64)',
+                       'rgb(153,102,255)',
+                       'rgb(255,205,86)',
+                       'rgb(201,203,207)']
     }]
   };
   var medischeLeeftijdOptions = {
@@ -1203,11 +846,23 @@ maakGrafiekSpoedLeeftijd = function(spoedeLeeftijdData, referentieSpoedeLeeftijd
     datasets: [{
       label: ['2023'],
       data: spoedeLeeftijdData,
-      backgroundColor: ['#36a2eb', '#ff6384', 'orange', '#ffce56', '#39e598', '#cc65fe']
+      backgroundColor: ['rgb(54,162,235)',
+                        'rgb(255,99,132)',
+                        'rgb(75,192,192)',
+                        'rgb(255,159,64)',
+                        'rgb(153,102,255)',
+                        'rgb(255,205,86)',
+                        'rgb(201,203,207)']
     }, {
       label: ['gem. 2021/2022'],
       data: referentieSpoedeLeeftijdData,
-      backgroundColor: ['#36a2eb', '#ff6384', 'orange', '#ffce56', '#39e598', '#cc65fe']
+      backgroundColor: ['rgb(54,162,235)',
+                        'rgb(255,99,132)',
+                        'rgb(75,192,192)',
+                        'rgb(255,159,64)',
+                        'rgb(153,102,255)',
+                        'rgb(255,205,86)',
+                        'rgb(201,203,207)']
     }]
   };
   var spoedLeeftijdOptions = {
@@ -1234,11 +889,23 @@ maakGrafiekGeplandeLeeftijd = function(geplandeLeeftijdData, referentieGeplandeL
     datasets: [{
       label: ['2023'],
       data: geplandeLeeftijdData,
-      backgroundColor: ['#36a2eb', '#ff6384', 'orange', '#ffce56', '#39e598', '#cc65fe']
+      backgroundColor: ['rgb(54,162,235)',
+                        'rgb(255,99,132)',
+                        'rgb(75,192,192)',
+                        'rgb(255,159,64)',
+                        'rgb(153,102,255)',
+                        'rgb(255,205,86)',
+                        'rgb(201,203,207)']
     }, {
       label: ['gem. 2021/2022'],
       data: referentieGeplandeLeeftijdData,
-      backgroundColor: ['#36a2eb', '#ff6384', 'orange', '#ffce56', '#39e598', '#cc65fe']
+      backgroundColor: ['rgb(54,162,235)',
+                        'rgb(255,99,132)',
+                        'rgb(75,192,192)',
+                        'rgb(255,159,64)',
+                        'rgb(153,102,255)',
+                        'rgb(255,205,86)',
+                        'rgb(201,203,207)']
     }]
   };
   var geplandLeeftijdOptions = {

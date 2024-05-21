@@ -156,18 +156,18 @@ footer {
 }
 
 .cirkel1 {
-    background-color: #feb0c0;
-    border: 2px solid #ff6384;
+    background-color: rgba(54,162,235, 0.8);
+    border: 2px solid rgb(54,162,235);
 }
 
 .cirkel2 {
-    background-color: #fee5a9;
-    border: 2px solid #ffcd56;
+    background-color: rgba(255,99,132, 0.8);
+    border: 2px solid rgb(255,99,132);
 }
 
 .cirkel3 {
-    background-color: #a4dede;
-    border: 2px solid #4bc0c0;
+    background-color: rgba(75,192,192, 0.8);
+    border: 2px solid rgb(75,192,192);
 }
 
 .lijn-behandelduur {
