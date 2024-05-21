@@ -19,7 +19,7 @@
                 <h1>Nationale Intensive Care Evaluatie IC-bedden</h1>
                 <h2>IC Bedbezetting Dashboard Prototype</h2>
             </div>
-            <div class="lijn"></div>
+            <div class="lijn-header"></div>
         </header>
 
         <!-- Navigatiemenu -->
@@ -27,40 +27,50 @@
             <a href="hoofdpagina.html">| HOOFDPAGINA</a>
             <a href="mei_overzicht.html">| MEI 2023</a>
             <a class="active" href="jaaroverzicht.html">| JAAROVERZICHT 2023</a>
-            <div class="topnav-right"><a href="index.html">| LOG UIT</a></div>
+            <div class="topnav-right">
+                <a href="hulppagina.html"> HULP </a>
+                <a href=" index.html">| LOG UIT</a>
+            </div>
         </div>
 
         <main>
             <!-- Hier komen de diagrammen onder elkaar te staan met titel en beschrijving -->
-            <section class="dashboard-jaar">
-                <h1>Jaaroverzicht</h1>
+            <section class="dashboard">
+                <p>* De gegevens waarop de grafiek is gebaseerd, zijn reëel.</p>
+                <p>** De gegevens waarop deze grafiek is gebaseerd, zijn fictief.</p>
                 <div class="diagram">
-                    <h2>Aantal opnames per maand in 2023</h2>
-                    <p>Echte data. De rode lijn laadt soms niet meteen in. Je kunt dit oplossen door in de legenda iets aan te klikken.</p>
+                    <h2>Het totaal aantal IC-patiënten per maand in 2023 *</h2>
+                    <h4>De rode lijn laadt soms niet meteen in. U kunt dit oplossen door in de legenda iets aan te
+                        klikken.</h4>
                     <canvas id="jaarChart"></canvas>
                 </div>
 
                 <div class="diagram">
-                    <h2>Aantal opnames per maand in 2023 per opnametype</h2>
-                    <p>Echte data. De data in de grafiek laadt niet automatisch. Je kunt dit oplossen door in de legenda iets aan te klikken.</p>
+                    <h2>Het totaal aantal IC-patiënten per maand in 2023 per opnametype *</h2>
+                    <h4>De data in de grafiek laadt niet automatisch. U kunt dit oplossen door in de legenda iets aan te
+                        klikken</h4>
                     <canvas id="jaarOpnametypesChart"></canvas>
                 </div>
 
                 <div class="diagram">
-                    <h2>Aantal opnames per maand in 2023 per diagnosecategorie</h2>
-                    <p>Data is niet bijgeleverd.</p>
+                    <h2>Het totaal aantal IC-patiënten per maand in 2023 per diagnosecategorie **</h2>
                     <canvas id="jaarDiagnoseChart"></canvas>
                 </div>
 
                 <div class="diagram">
-                    <h2>Aantal opnames per maand in 2023 per leeftijdscategorie</h2>
-                    <p>Nog niet met echte data</p>
-                    <canvas id="jaarLeeftijdOpnames"></canvas>
+                    <h2>Het totaal aantal IC-patiënten per maand in 2023 per leeftijdscategorie *</h2>
+                    <canvas id="jaarLeeftijdChart"></canvas>
                 </div>
-
+                
+                <div class= "diagram">
+                    <h2>Verdeling van leeftijdsgroepen over de verschillende opnametypes in mei*</h2>
+                    <canvas class="pieChart" id="medischeLeeftijd"></canvas>
+                    <canvas class="pieChart" id="spoedLeeftijd"></canvas>
+                    <canvas class="pieChart" id="geplandLeeftijd"></canvas>
+                </div>
+                
                 <div class="diagram">
-                    <h2>Gemiddelde IC-behandelduur per maand gedurende verschillende jaren</h2>
-                    <p>Data is niet bijgeleverd.</p>
+                    <h2>De gemiddelde IC-behandelduur per maand over de jaren heen **</h2>
                     <canvas id="jaarICChart"></canvas>
                 </div>
             </section>
@@ -68,7 +78,7 @@
 
         <!-- Footer -->
         <footer>
-            <p>&copy; 2024 IC Bedbezetting Dashboard</p>
+            <p>&copy; 2024 IC Bedbezetting Dashboard Prototype</p>
         </footer>
     </div>
 </body>

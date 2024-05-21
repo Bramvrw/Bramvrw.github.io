@@ -12,9 +12,15 @@ function Maand() {
   //Grafiek voor opnames per dag in de maand mei per opnametype
   OpnamesDagType();
 
+  //Grafiek voor opnames per dag in de maand mei per diagnose
+  maakMaandGrafiekDiagnose();
+
   //Grafiek voor opnames per dag in de maand mei per leeftijdscategorie
   OpnamesLeeftijd();
 
+  //
+  leeftijdsverdelingPerOpnametype();
+  
 };
 
 //------- FUNCTIES OM DATA OP TE VRAGEN  ------------------//
@@ -206,13 +212,6 @@ function OpnamesLeeftijd() {
   let referentieData6070 = [];
   let referentieData7080 = [];
   let referentieData80Plus = [];
-  //als we het goed veranderen kunnen de arrays hieronder waarschijnlijk weg
-  let jaar40 = [];
-  let jaar4050 = [];
-  let jaar5060 = [];
-  let jaar6070 = [];
-  let jaar7080 = [];
-  let jaar80 = [];
 
   // Queries. Query5 de 
   const query5 = JSON.stringify({
@@ -319,18 +318,18 @@ function OpnamesLeeftijd() {
 
       // Ik heb het weer teruggezet maar ik had ipv jaar40.slice etc referentieData40Min.slice. Want eigenlijk is jaar40 etc geen array. Ik weet niet waarom we dat een array hebben gemaakt
       // Daarna worden de aantallen opgesplitst in 2021 en 2022
-      const data40Min2021 = jaar40.slice(0, 31);
-      const data40Min2022 = jaar40.slice(31, 62);
-      const data40502021 = jaar4050.slice(0, 31);
-      const data40502022 = jaar4050.slice(31, 62);
-      const data50602021 = jaar5060.slice(0, 31);
-      const data50602022 = jaar5060.slice(31, 62);
-      const data60702021 = jaar6070.slice(0, 31);
-      const data60702022 = jaar6070.slice(31, 62);
-      const data70802021 = jaar7080.slice(0, 31);
-      const data70802022 = jaar7080.slice(31, 62);
-      const data80Plus2021 = jaar80.slice(0, 31);
-      const data80Plus2022 = jaar80.slice(31, 62);
+      const data40Min2021 = referentieData40Min.slice(0, 31);
+      const data40Min2022 = referentieData40Min.slice(31, 62);
+      const data40502021 = referentieData4050.slice(0, 31);
+      const data40502022 = referentieData4050.slice(31, 62);
+      const data50602021 = referentieData5060.slice(0, 31);
+      const data50602022 = referentieData5060.slice(31, 62);
+      const data60702021 = referentieData6070.slice(0, 31);
+      const data60702022 = referentieData6070.slice(31, 62);
+      const data70802021 = referentieData7080.slice(0, 31);
+      const data70802022 = referentieData7080.slice(31, 62);
+      const data80Plus2021 = referentieData80Plus.slice(0, 31);
+      const data80Plus2022 = referentieData80Plus.slice(31, 62);
 
       // En worden de gemiddeldes berekend per leeftijdscategorie
       for (let i = 0; i < data40Min2021.length; i++) {
@@ -347,6 +346,189 @@ function OpnamesLeeftijd() {
     }
   };
 };
+
+leeftijdsverdelingPerOpnametype = function(){
+  // Specificatie van arrays en variabelen
+  let medischLeeftijd = [];
+  let spoedLeeftijd = [];
+  let geplandLeeftijd = [];
+  let referentieMedischLeeftijd = [];
+  let referentieSpoedLeeftijd = [];
+  let referentieGeplandLeeftijd = [];
+
+  medisch40min = 0;
+  medisch4050 = 0;
+  medisch5060 = 0;
+  medisch6070 = 0;
+  medisch7080 = 0;
+  medisch80plus = 0;
+  spoed40min = 0;
+  spoed4050 = 0;
+  spoed5060 = 0;
+  spoed6070 = 0;
+  spoed7080 = 0;
+  spoed80plus = 0;
+  gepland40min = 0;
+  gepland4050 = 0;
+  gepland5060 = 0;
+  gepland6070 = 0;
+  gepland7080 = 0;
+  gepland80plus = 0;  
+
+  // Queries. Query7 en query8 zoeken alle leeftijdscategorien op binnen alle opnametypes in mei. Query7 doet dit voor 2023 en query8 doet dit voor 2021 en 2022
+  const query7 = JSON.stringify({
+    query: `{
+      nvic_data(where: {datum: {_regex: "^2023-05"}}, order_by: {datum: asc}) {
+        datum
+        aantal_gepland_40_50
+        aantal_gepland_40min
+        aantal_gepland_50_60
+        aantal_gepland_60_70
+        aantal_gepland_70_80
+        aantal_gepland_80plus
+        aantal_medisch_40_50
+        aantal_medisch_40min
+        aantal_medisch_50_60
+        aantal_medisch_60_70
+        aantal_medisch_70_80
+        aantal_medisch_80plus
+        aantal_spoed_40_50
+        aantal_spoed_40min
+        aantal_spoed_50_60
+        aantal_spoed_60_70
+        aantal_spoed_70_80
+        aantal_spoed_80plus
+      }
+    }`
+  });
+
+  const query8 = JSON.stringify({
+    query: `{
+      nvic_data(where: {_and: [{datum: {_regex: "-05-"}}, {datum: {_lte: "2022-12-31"}}]}, order_by: {datum: asc}) {
+    datum
+    aantal_gepland_40_50
+    aantal_gepland_40min
+    aantal_gepland_50_60
+    aantal_gepland_60_70
+    aantal_gepland_70_80
+    aantal_gepland_80plus
+    aantal_medisch_40_50
+    aantal_medisch_40min
+    aantal_medisch_50_60
+    aantal_medisch_60_70
+    aantal_medisch_70_80
+    aantal_medisch_80plus
+    aantal_spoed_40_50
+    aantal_spoed_40min
+    aantal_spoed_50_60
+    aantal_spoed_60_70
+    aantal_spoed_70_80
+    aantal_spoed_80plus
+  }
+    }`
+  });
+
+  // Eerste request wordt geopend, query7 wordt verstuurd 
+  const request7 = new XMLHttpRequest();
+  request7.open('POST', 'https://clean-garfish-69.hasura.app/v1/graphql');
+  request7.setRequestHeader('content-type', 'application/json');
+  request7.setRequestHeader('x-hasura-admin-secret', 'JL0Fh28uE4BqS09O0EhdnQnPQ6SJSyB0LwEXd6eNpktZpR9D0qMEDd7EtOgObty4');
+  request7.send(query7);
+
+  // Hier worden de aantallen opnames per leeftijdscategorien per opnametype bij elkaar opgeteld
+  request7.onload = function(){
+    const opnametypesPerLeeftijd = JSON.parse(request7.response);
+    opnametypesPerLeeftijd.data.nvic_data.forEach(item => {
+      medisch40min += item.aantal_medisch_40min;
+      medisch4050 += item.aantal_medisch_40_50;
+      medisch5060 += item.aantal_medisch_50_60;
+      medisch6070 += item.aantal_medisch_60_70;
+      medisch7080 += item.aantal_medisch_70_80;
+      medisch80plus += item.aantal_medisch_80plus;
+      spoed40min += item.aantal_spoed_40min;
+      spoed4050 += item.aantal_spoed_40_50;
+      spoed5060 += item.aantal_spoed_50_60;
+      spoed6070 += item.aantal_spoed_60_70;
+      spoed7080 += item.aantal_spoed_70_80;
+      spoed80plus += item.aantal_spoed_80plus;
+      gepland40min += item.aantal_gepland_40min;
+      gepland4050 += item.aantal_gepland_40_50;
+      gepland5060 += item.aantal_gepland_50_60;
+      gepland6070 += item.aantal_gepland_60_70;
+      gepland7080 += item.aantal_gepland_70_80;
+      gepland80plus += item.aantal_gepland_80plus;
+    });
+
+    // Daarna werden deze waarden opgeslagen in de juiste arrays
+    medischLeeftijd.push(medisch40min, medisch4050, medisch5060, medisch6070, medisch7080, medisch80plus);
+    spoedLeeftijd.push(spoed40min, spoed4050, spoed5060, spoed6070, spoed7080, spoed80plus);
+    geplandLeeftijd.push(gepland40min, gepland4050, gepland5060, gepland6070, gepland7080, gepland80plus);
+
+  // Tweede request wordt geopend, query4 wordt verstuurd
+  const request8 = new XMLHttpRequest();
+  request8.open('POST', 'https://clean-garfish-69.hasura.app/v1/graphql');
+  request8.setRequestHeader('content-type', 'application/json');
+  request8.setRequestHeader('x-hasura-admin-secret', 'JL0Fh28uE4BqS09O0EhdnQnPQ6SJSyB0LwEXd6eNpktZpR9D0qMEDd7EtOgObty4');
+  request8.send(query8);
+
+  request8.onload = function(){
+    const referentieOpnametypesPerLeeftijd = JSON.parse(request8.response);
+
+    // Variabelen resetten om te hergebruiken
+    medisch40min = 0;
+    medisch4050 = 0;
+    medisch5060 = 0;
+    medisch6070 = 0;
+    medisch7080 = 0;
+    medisch80plus = 0;
+    spoed40min = 0;
+    spoed4050 = 0;
+    spoed5060 = 0;
+    spoed6070 = 0;
+    spoed7080 = 0;
+    spoed80plus = 0;
+    gepland40min = 0;
+    gepland4050 = 0;
+    gepland5060 = 0;
+    gepland6070 = 0;
+    gepland7080 = 0;
+    gepland80plus = 0;
+
+    // Hier worden de aantallen opnames per leeftijdscategorie per opnametype bij elkaar opgeteld
+    referentieOpnametypesPerLeeftijd.data.nvic_data.forEach(item =>{
+      medisch40min += item.aantal_medisch_40min;
+      medisch4050 += item.aantal_medisch_40_50;
+      medisch5060 += item.aantal_medisch_50_60;
+      medisch6070 += item.aantal_medisch_60_70;
+      medisch7080 += item.aantal_medisch_70_80;
+      medisch80plus += item.aantal_medisch_80plus;
+      spoed40min += item.aantal_spoed_40min;
+      spoed4050 += item.aantal_spoed_40_50;
+      spoed5060 += item.aantal_spoed_50_60;
+      spoed6070 += item.aantal_spoed_60_70;
+      spoed7080 += item.aantal_spoed_70_80;
+      spoed80plus += item.aantal_spoed_80plus;
+      gepland40min += item.aantal_gepland_40min;
+      gepland4050 += item.aantal_gepland_40_50;
+      gepland5060 += item.aantal_gepland_50_60;
+      gepland6070 += item.aantal_gepland_60_70;
+      gepland7080 += item.aantal_gepland_70_80;
+      gepland80plus += item.aantal_gepland_80plus;
+    });
+
+    // En weer in de juiste arrays gezet
+    referentieMedischLeeftijd.push(medisch40min / 2, medisch4050 / 2, medisch5060 / 2, medisch6070 / 2, medisch7080 / 2, medisch80plus / 2);
+    referentieSpoedLeeftijd.push(spoed40min / 2, spoed4050 / 2, spoed5060 / 2, spoed6070 / 2, spoed7080 / 2, spoed80plus / 2);
+    referentieGeplandLeeftijd.push(gepland40min / 2, gepland4050 / 2, gepland5060 / 2, gepland6070 / 2, gepland7080 / 2, gepland80plus / 2);
+    
+    // Hier wordt de data doorgegeven aan deze drie functies om per opnametype een grafiek te maken
+  maakGrafiekMedischeLeeftijd(medischLeeftijd, referentieMedischLeeftijd);
+  maakGrafiekSpoedLeeftijd(spoedLeeftijd, referentieSpoedLeeftijd);
+  maakGrafiekGeplandeLeeftijd(geplandLeeftijd, referentieGeplandLeeftijd);
+    };
+  };
+};
+
 
 // -------------------------MAANDOVERZICHT GRAFIEKEN--------------------------//
 
@@ -382,38 +564,38 @@ maakMaandGrafiekOpnametypes = function(dataMedisch, dataSpoed, dataGepland, refe
       type: 'bar',
       label: 'Aantal Medische opnames',
       data: dataMedisch,
-      backgroundColor: 'rgb(54, 162, 235)',
-      borderColor: 'rgb(54, 162, 235)'
+      backgroundColor: 'rgba(174, 214, 241, 0.8)',
+      borderColor: 'rgba(174, 214, 241, 0.8)'
     }, {
       type: 'bar',
       label: 'Aantal Spoed chirurgische opnames',
       data: dataSpoed,
-      backgroundColor: 'rgb(255, 99, 132)',
-      borderColor: 'rgb(255, 99, 132)'
+      backgroundColor: 'rgba(171, 235, 198, 0.5)',
+      borderColor: 'rgba(171, 235, 198, 0.5)'
     }, {
       type: 'bar',
       label: 'Aantal Gepland chirurgische opnames',
       data: dataGepland,
-      backgroundColor: 'rgb(75, 192, 192)',
-      borderColor: 'rgb(75, 192, 192)'
+      backgroundColor: 'rgba(215, 189, 226, 0.5)',
+      borderColor: 'rgba(215, 189, 226, 0.5)'
     }, {
       type: 'line',
       label: 'Aantal Medische opnames in vorige jaren',
       data: referentieDataMedisch,
-      backgroundColor: 'rgb(54, 162, 235)',
-      borderColor: 'rgb(54, 162, 235)'
+      backgroundColor: 'rgba(174, 214, 241)',
+      borderColor: 'rgba(174, 214, 241)'
     }, {
       type: 'line',
       label: 'Aantal Spoed chirurgische opnames in vorige jaren',
       data: referentieDataSpoed,
-      backgroundColor: 'rgb(255, 99, 132)',
-      borderColor: 'rgb(255, 99, 132)'
+      backgroundColor: 'rgba(171, 235, 198)',
+      borderColor: 'rgba(171, 235, 198)'
     }, {
       type: 'line',
       label: 'Aantal Gepland chirurgische opnames in vorige jaren',
       data: referentieDataGepland,
-      backgroundColor: 'rgb(75, 192, 192)',
-      borderColor: 'rgb(75, 192, 192)'
+      backgroundColor: 'rgba(215, 189, 226)',
+      borderColor: 'rgba(215, 189, 226)'
     }],
     labels: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31']
   };
@@ -513,34 +695,34 @@ maakMaandGrafiekOpnamesLeeftijd = function(referentieData40Min, referentieData40
       type: 'bar',
       label: '18-40 Jaar',
       data: data40Min,
-      backgroundColor: '#E6B0AA'
+      backgroundColor: 'rgba(230, 176, 170, 0.5)'
     }, {
       type: 'bar',
       label: '40-50 Jaar',
       data: data4050,
-      backgroundColor: '#AED6F1'
+      backgroundColor: 'rgba(174, 214, 241, 0.5)'
     }, {
       type: 'bar',
       label: '50-60 Jaar',
       data: data5060,
-      backgroundColor: '#D5DBDB'
+      backgroundColor: 'rgba(213, 219, 219, 0.5)'
     }, {
       type: 'bar',
       label: '60-70 Jaar',
       data: data6070,
-      backgroundColor: '#FAD7A0'
+      backgroundColor: 'rgba(250, 215, 160, 0.5)'
     }, {
       type: 'bar',
       label: '70-80 Jaar',
       data: data7080,
-      backgroundColor: '#D7BDE2'
+      backgroundColor: 'rgba(215, 189, 226, 0.5)'
     }, {
       type: 'bar',
       label: '80+ Jaar',
       data: data80Plus,
-      backgroundColor: '#ABEBC6'
+      backgroundColor: 'rgba(171, 235, 198, 0.5)'
     }],
-    labels: ['Week 01', 'Week 02', 'Week 03', 'Week 04']
+    labels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]
   };
   var maandGrafiekOpnamesLeeftijdOptions = {}
   var maandChartCtx = document.getElementById('leeftijdOpnames').getContext('2d');
@@ -551,3 +733,101 @@ maakMaandGrafiekOpnamesLeeftijd = function(referentieData40Min, referentieData40
   });
   return leeftijdOpnames;
 };
+
+//GRAFIEK leeftijdsverdeling van medische opnames
+maakGrafiekMedischeLeeftijd = function(medischeLeeftijdData, referentieMedischeLeeftijdData){
+  var medischLeeftijdData = {
+    labels: ['18-40 jaar', '40-50 jaar', '50-60 jaar', '60-70 jaar', '70-80 jaar', '80+ jaar'],
+    datasets: [{
+      label: ['mei 2023'],
+      data: medischeLeeftijdData,
+      backgroundColor: ['#36a2eb', '#ff6384', 'orange', '#ffce56', '#39e598', '#cc65fe']
+    }, {
+      label: ['gem. mei 2021/2022'],
+      data: referentieMedischeLeeftijdData,
+      backgroundColor: ['#36a2eb', '#ff6384', 'orange', '#ffce56', '#39e598', '#cc65fe']
+    }]
+  };
+  var medischeLeeftijdOptions = {
+    plugins: {
+      title: {
+        display: true,
+        text: 'Leeftijdsverdeling van medische opnames'
+      }
+    }
+  };
+  var medischeLeeftijdChartCtx = document.getElementById('medischeLeeftijd').getContext('2d');
+
+  const medischeLeeftijdChart = new Chart(medischeLeeftijdChartCtx, {
+    data: medischLeeftijdData,
+    type: 'pie',
+    options: medischeLeeftijdOptions
+  });
+  return medischeLeeftijdChart;
+};
+
+//GRAFIEK leeftijdsverdeling van spoed opnames
+maakGrafiekSpoedLeeftijd = function(spoedeLeeftijdData, referentieSpoedeLeeftijdData){
+  var spoedLeeftijdData = {
+    labels: ['18-40 jaar', '40-50 jaar', '50-60 jaar', '60-70 jaar', '70-80 jaar', '80+ jaar'],
+    datasets: [{
+      label: ['mei 2023'],
+      data: spoedeLeeftijdData,
+      backgroundColor: ['#36a2eb', '#ff6384', 'orange', '#ffce56', '#39e598', '#cc65fe']
+    }, {
+      label: ['gem. mei 2021/2022'],
+      data: referentieSpoedeLeeftijdData,
+      backgroundColor: ['#36a2eb', '#ff6384', 'orange', '#ffce56', '#39e598', '#cc65fe']
+    }]
+  };
+  var spoedLeeftijdOptions = {
+    plugins: {
+      title: {
+        display: true,
+        text: 'Leeftijdsverdeling van spoed opnames'
+      }
+    }
+  };
+  var spoedLeeftijdChartCtx = document.getElementById('spoedLeeftijd').getContext('2d');
+
+  const spoedLeeftijdChart = new Chart(spoedLeeftijdChartCtx, {
+    data: spoedLeeftijdData,
+    type: 'pie',
+    options: spoedLeeftijdOptions
+  });
+  return spoedLeeftijdChart;
+};
+
+//GRAFIEK leeftijdsverdeling van geplande opnames
+maakGrafiekGeplandeLeeftijd = function(geplandeLeeftijdData, referentieGeplandeLeeftijdData){
+  var geplandLeeftijdData = {
+    labels: ['18-40 jaar', '40-50 jaar', '50-60 jaar', '60-70 jaar', '70-80 jaar', '80+ jaar'],
+    datasets: [{
+      label: ['mei 2023'],
+      data: geplandeLeeftijdData,
+      backgroundColor: ['#36a2eb', '#ff6384', 'orange', '#ffce56', '#39e598', '#cc65fe']
+    }, {
+      label: ['gem. mei 2021/2022'],
+      data: referentieGeplandeLeeftijdData,
+      backgroundColor: ['#36a2eb', '#ff6384', 'orange', '#ffce56', '#39e598', '#cc65fe']
+    }]
+  };
+  var geplandLeeftijdOptions = {
+    plugins: {
+      title: {
+        display: true,
+        text: 'Leeftijdsverdeling van geplande opnames'
+      }
+    }
+  };
+  var geplandLeeftijdChartCtx = document.getElementById('geplandLeeftijd').getContext('2d');
+
+  const geplandLeeftijdChart = new Chart(geplandLeeftijdChartCtx, {
+    data: geplandLeeftijdData,
+    type: 'pie',
+    options: geplandLeeftijdOptions
+  });
+  return geplandLeeftijdChart;
+};
+
+

@@ -19,7 +19,7 @@
                 <h1>Nationale Intensive Care Evaluatie IC-bedden</h1>
                 <h2>IC Bedbezetting Dashboard Prototype</h2>
             </div>
-            <div class="lijn"></div>
+            <div class="lijn-header"></div>
         </header>
 
         <!-- Navigatiemenu -->
@@ -27,39 +27,61 @@
             <a href="hoofdpagina.html">| HOOFDPAGINA</a>
             <a class="active" href="mei_overzicht.html">| MEI 2023</a>
             <a href="jaaroverzicht.html">| JAAROVERZICHT 2023</a>
-            <div class="topnav-right"><a href="index.html">| LOG UIT</a></div>
+            <div class="topnav-right">
+                <a href="hulppagina.html"> HULP</a>
+                <a href=" index.html">| LOG UIT</a>
+            </div>
         </div>
-        
+
         <!-- Hier komen de diagrammen onder elkaar te staan met titel en beschrijving -->
         <main>
             <section class="dashboard">
                 <div class="diagram">
-                    <h2>Aantal opnames per dag in mei</h2>
-                    <p>Echte data</p>
+                    <p>* De gegevens waarop de grafiek is gebaseerd, zijn reëel.</p>
+                    <p>** De gegevens waarop deze grafiek is gebaseerd, zijn fictief.</p>
+
+                    <h2>Het totaal aantal nieuwe IC-patiënten per dag in mei 2023 *</h2>
                     <canvas id="maandChart""></canvas>
                 </div>
                 <div class=" diagram">
-                    <h2>Aantal opnames per dag in mei per opnametype</h2>
-                    <p>Echte data</p>
-                    <canvas id="maandOpnametypesChart"></canvas>
+                        <h2>Het totaal aantal IC- patiënten per dag in mei 2023 per opnametype *</h2>
+                        <canvas id="maandOpnametypesChart"></canvas>
                 </div>
+                
                 <div class="diagram">
-                    <h2>Aantal opnames per dag in mei per diagnosecategorie</h2>
-                    <p>Data is niet bijgeleverd.</p>
+                    <h2>Het totaal aantal IC- patiënten per dag in mei 2023 per diagnosecategorie **</h2>
                     <canvas id="maandDiagnoseChart"></canvas>
                 </div>
+                
                 <div class="diagram">
-                    <h2>Aantal opnames per week in mei per leeftijdscategorie</h2>
-                    <p>Echte data</p>
+                    <h2>Het totaal aantal IC- patiënten per dag in mei 2023 per leeftijdscategorie *</h2>
                     <canvas id="leeftijdOpnames"></canvas>
                 </div>
+                
+                <div class= "diagram">
+                    <h2>Verdeling van leeftijdsgroepen over de verschillende opnametypes in mei*</h2>
+                    <canvas class="pieChart" id="medischeLeeftijd"></canvas>
+                    <canvas class="pieChart" id="spoedLeeftijd"></canvas>
+                    <canvas class="pieChart" id="geplandLeeftijd"></canvas>
+                </div>
+                
                 <div class="diagram">
-                    <h2>Gemiddelde IC-behandelduur in mei gedurende verschillende jaren</h2>
-                    <p>Data is niet bijgeleverd.</p>
-                    <div class="cijfer">2023<br>3,5</div>
-                    <div class="cijfer">2022<br>2,1</div>
-                    <div class="cijfer">2021<br>4</div>
-                    <div class="cijfer">2020<br>3,8</div>
+                    <h2>De gemiddelde IC-behandelduur in mei over de jaren heen **</h2>
+                    <div class="behandelduur-container">
+                        <div class="cirkel-behandelduur">
+                            <div class="cirkel1">3,5</div>
+                            <div class="jaar">2023</div>
+                        </div>
+                        <div class="cirkel-behandelduur">
+                            <div class="cirkel2">2,1</div>
+                            <div class="jaar">2022</div>
+                        </div>
+                        <div class="cirkel-behandelduur">
+                            <div class="cirkel3">4</div>
+                            <div class="jaar">2021</div>
+                        </div>
+                        <div class="lijn-behandelduur"></div>
+                    </div>
                     <br>
                     <br>
                 </div>
@@ -68,7 +90,7 @@
 
         <!-- Footer -->
         <footer>
-            <p>&copy; 2024 IC Bedbezetting Dashboard</p>
+            <p>&copy; 2024 IC Bedbezetting Dashboard Prototype</p>
         </footer>
     </div>
 </body>
