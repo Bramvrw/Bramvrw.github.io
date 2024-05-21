@@ -6,7 +6,7 @@ In het prototype wordt een maandoverzicht van mei 2023 en een jaaroverzicht van 
 
 <h3>Data</h3>
 Dit prototype is grotendeels gemaakt met echte data uit de Nice-registratie. Deze data hebben we als een csv-bestand ontvangen en hebben we in een database gestopt met behulp van hasura. Om de data op te vragen maken een connectie met de api hasura en versturen we een query in de vorm van een GraphiQL-query. Hieronder staat een voorbeeld:
-
+<br>
 Dit is de query.
 <code>
   const query1 = JSON.stringify({
