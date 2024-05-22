@@ -117,12 +117,20 @@ footer {
     margin: 20px auto;
 }
 
-.pieChart{
-    width: 33%;
-    margin: 20px auto;
+/*Opmaak leeftijd-opnametype Kleine chart*/
+.leeftijd-opnametypes-container {
     display: flex;
-    position: relative;
-    align-items: center;
+    gap: 10px;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 10px 0;
+}
+
+.KleinChart {
+    flex: 1;
+    max-width: 240px;
+    height: auto;
+  
 }
 
 /*Opmaak IC-behandelduur grafiek*/
@@ -173,7 +181,7 @@ footer {
 .lijn-behandelduur {
     position: absolute;
     height: 1px;
-    width: 80%;
+    width: 70%;
     background-color: black;
     bottom: 180px;
 }

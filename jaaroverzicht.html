@@ -8,13 +8,14 @@
     <link rel="stylesheet" href="css/layout.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="javascript/jaaroverzicht.js"></script>
+    <script src="javascript/inloggenUitloggen.js"></script>
 </head>
 
 <body onload="Jaar()">
     <div class="container">
         <!-- Header -->
         <header>
-            <img src="img/NICE_logo.png" alt="Logo">
+            <a href="hoofdpagina.html"><img src="img/NICE_logo.png" alt="Logo"></a>
             <div class="header-text">
                 <h1>Nationale Intensive Care Evaluatie IC-bedden</h1>
                 <h2>IC Bedbezetting Dashboard Prototype</h2>
@@ -29,7 +30,7 @@
             <a class="active" href="jaaroverzicht.html">| JAAROVERZICHT 2023</a>
             <div class="topnav-right">
                 <a href="hulppagina.html"> HULP </a>
-                <a href=" index.html">| LOG UIT</a>
+                <a href=" index.html" onclick="return confirmLogout()">| LOG UIT</a>
             </div>
         </div>
 
@@ -37,7 +38,7 @@
             <!-- Hier komen de diagrammen onder elkaar te staan met titel en beschrijving -->
             <section class="dashboard">
                 <p>* De gegevens waarop de grafiek is gebaseerd, zijn reëel.</p>
-                <p>** De gegevens waarop deze grafiek is gebaseerd, zijn fictief.</p>
+                <p>** De gegevens waarop de grafiek is gebaseerd, zijn fictief.</p>
                 <div class="diagram">
                     <h2>Het totaal aantal IC-patiënten per maand in 2023 *</h2>
                     <canvas id="jaarChart"></canvas>
@@ -59,10 +60,12 @@
                 </div>
                 
                 <div class= "diagram">
-                    <h2>Verdeling van leeftijdsgroepen over de verschillende opnametypes in mei*</h2>
-                    <canvas class="pieChart" id="medischeLeeftijd"></canvas>
-                    <canvas class="pieChart" id="spoedLeeftijd"></canvas>
-                    <canvas class="pieChart" id="geplandLeeftijd"></canvas>
+                    <h2>Verdeling van leeftijdsgroepen over de verschillende opnametypes in mei *</h2>
+                    <div class="leeftijd-opnametypes-container">
+                        <canvas class="KleinChart" id="medischeLeeftijd"></canvas>
+                        <canvas class="KleinChart" id="spoedLeeftijd"></canvas>
+                        <canvas class="KleinChart" id="geplandLeeftijd"></canvas>
+                    </div>
                 </div>
                 
                 <div class="diagram">

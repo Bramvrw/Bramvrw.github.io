@@ -1,7 +1,5 @@
 //-------------- OPMERKINGEN -----------------//
-//Bij elke grafiek in de opties ervoor zorgen dat de kleuren van lijnen overeenkomen  met de lijnen van de bars zodat duidelijk is wat bij wat hoort!!!
-// kleur van de bar iets lichter dan de kleur van de lijn. Helpt met zichtbaarheid.
-// Kijken naar de functie OpnamesDag, want we houden geen rekening met het feit dat het wekelijkse data moet zijn. Misschien kunnen we de strategie uit jaaroverzicht gebruiken samen met slicen om de gemiddeldes te berekenen.
+
 //----------------------------------------------------
 
 // Grafieken voor de opnames in mei
@@ -22,6 +20,7 @@ function Maand() {
   leeftijdsverdelingPerOpnametype();
   
 };
+
 
 //------- FUNCTIES OM DATA OP TE VRAGEN  ------------------//
 // DATA AANTALLEN OPNAMES
@@ -340,6 +339,21 @@ function OpnamesLeeftijd() {
         referentieData7080[i] = (data70802021[i] + data70802022[i]) / 2;
         referentieData80Plus[i] = (data80Plus2021[i] + data80Plus2022[i]) / 2;
       };
+      
+      data40Min = groepeerPerWeek(data40Min);
+      data4050 = groepeerPerWeek(data4050);
+      data5060 = groepeerPerWeek(data5060);
+      data6070 = groepeerPerWeek(data6070);
+      data7080 = groepeerPerWeek(data7080);
+      data80Plus = groepeerPerWeek(data80Plus);
+
+      referentieData40Min = groepeerPerWeek(referentieData40Min);
+      referentieData4050 = groepeerPerWeek(referentieData4050);
+      referentieData5060 = groepeerPerWeek(referentieData5060);
+      referentieData6070 = groepeerPerWeek(referentieData6070);
+      referentieData7080 = groepeerPerWeek(referentieData7080);
+      referentieData80Plus = groepeerPerWeek(referentieData80Plus);
+
 
       // En hier wordt de functie opgeroepen om de grafiek te maken
       maakMaandGrafiekOpnamesLeeftijd(referentieData40Min, referentieData4050, referentieData5060, referentieData6070, referentieData7080, referentieData80Plus, data40Min, data4050, data5060, data6070, data7080, data80Plus);
@@ -520,6 +534,7 @@ leeftijdsverdelingPerOpnametype = function(){
     referentieMedischLeeftijd.push(medisch40min / 2, medisch4050 / 2, medisch5060 / 2, medisch6070 / 2, medisch7080 / 2, medisch80plus / 2);
     referentieSpoedLeeftijd.push(spoed40min / 2, spoed4050 / 2, spoed5060 / 2, spoed6070 / 2, spoed7080 / 2, spoed80plus / 2);
     referentieGeplandLeeftijd.push(gepland40min / 2, gepland4050 / 2, gepland5060 / 2, gepland6070 / 2, gepland7080 / 2, gepland80plus / 2);
+
     
     // Hier wordt de data doorgegeven aan deze drie functies om per opnametype een grafiek te maken
   maakGrafiekMedischeLeeftijd(medischLeeftijd, referentieMedischLeeftijd);
@@ -540,26 +555,42 @@ maakMaandGrafiekOpnames = function(data, referentieData) {
       label: 'Aantal opnames',
       backgroundcolor: 'rgba(54,162,235, 0.8)',
       bordercolor: 'rgb(54,162,235)',
-      data: data
+      data: data,
+      pointStyle: 'rect'
     }, {
       type: 'line',
       label: 'Gemiddeld aantal opnames van vorige jaren',
       backgroundcolor: 'rgb(255,99,132)',
       bordercolor: 'rgb(255,99,132)',
-      data: referentieData
+      data: referentieData,
+      pointStyle: 'circle'
     }],
     labels: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31']
+    
   };
   var maandChartOptions = {
     scales: {
       x: {
-        title:{color:'red', display: true, text: "VUL HIER TEXT IN VOOR X-AS TITEL"},
+        title:{color:'black', display: true, text: "DATUM (dagen)"},
       },
       y: {
-        title:{color:'red', display: true, text: "VUL HIER TEXT IN VOOR Y-AS TITEL"}
+        title:{color:'black', display: true, text: "AANTAL IC-OPNAMES"}
       },
     },
-  };
+    plugins: {
+      legend: {
+        onHover: function(event) {
+          event.native.target.style.cursor = 'pointer';
+        },
+        onLeave: function(event){
+          event.native.target.style.cursor = 'default';
+        },
+        labels:{
+          usePointStyle: true,
+          }
+          }
+        }
+      };
   var maandChartCtx = document.getElementById('maandChart').getContext('2d');
 
   const maandChart = new Chart(maandChartCtx, {
@@ -578,48 +609,71 @@ maakMaandGrafiekOpnametypes = function(dataMedisch, dataSpoed, dataGepland, refe
       label: 'Aantal Medische opnames',
       data: dataMedisch,
       backgroundColor: 'rgba(54,162,235, 0.8)',
-      borderColor: 'rgba(54,162,235)'
+      borderColor: 'rgba(54,162,235)',
+      pointStyle: 'rect'
     }, {
       type: 'bar',
       label: 'Aantal Spoed chirurgische opnames',
       data: dataSpoed,
       backgroundColor: 'rgba(255,99,132, 0.8)',
-      borderColor: 'rgba(255,99,132)'
+      borderColor: 'rgba(255,99,132)',
+      hidden: true,
+      pointStyle: 'rect'
     }, {
       type: 'bar',
       label: 'Aantal Gepland chirurgische opnames',
       data: dataGepland,
       backgroundColor: 'rgba(75,192,192, 0.8)',
-      borderColor: 'rgba(75,192,192)'
+      borderColor: 'rgba(75,192,192)',
+      hidden: true,
+      pointStyle: 'rect'
     }, {
       type: 'line',
       label: 'Aantal Medische opnames in vorige jaren',
       data: referentieDataMedisch,
       backgroundColor: 'rgba(54,162,235)',
-      borderColor: 'rgba(54,162,235)'
+      borderColor: 'rgba(54,162,235)',
+      pointStyle: 'circle'
     }, {
       type: 'line',
       label: 'Aantal Spoed chirurgische opnames in vorige jaren',
       data: referentieDataSpoed,
       backgroundColor: 'rgba(255,99,132)',
-      borderColor: 'rgba(255,99,132)'
+      borderColor: 'rgba(255,99,132)',
+      hidden: true,
+      pointStyle: 'circle'
     }, {
       type: 'line',
       label: 'Aantal Gepland chirurgische opnames in vorige jaren',
       data: referentieDataGepland,
       backgroundColor: 'rgba(75,192,192)',
-      borderColor: 'rgba(75,192,192)'
+      borderColor: 'rgba(75,192,192)',
+      hidden: true,
+      pointStyle: 'circle'
     }],
     labels: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31']
   };
 
   var maandOpnametypesChartOptions = {
+    plugins: {
+        legend: {
+          onHover: function(event) {
+            event.native.target.style.cursor = 'pointer';
+          },
+          onLeave: function(event){
+            event.native.target.style.cursor = 'default';
+          },
+          labels: {
+            usePointStyle: true,
+            }
+        }
+    },
     scales: {
       x: {
-        title:{color:'red', display: true, text: "VUL HIER TEXT IN VOOR X-AS TITEL"},
+        title:{color:'black', display: true, text: "DATUM (dagen)"},
       },
       y: {
-        title:{color:'red', display: true, text: "VUL HIER TEXT IN VOOR Y-AS TITEL"}
+        title:{color:'black', display: true, text: "AANTAL IC-OPNAMES"}
       },
     },
   };
@@ -640,48 +694,71 @@ maakMaandGrafiekDiagnose = function() {
       label: 'CAP',
       backgroundcolor: 'rgba(54,162,235, 0.8)' ,
       bordercolor: 'rgb(54,162,235)' ,
-      data: [68, 69, 68, 70, 65, 67, 73, 71, 72, 69, 64, 65, 68, 75, 70, 73, 72, 66, 63, 74, 76, 71, 69, 70, 79, 68, 76, 69, 79, 76, 63]
+      data: [68, 69, 68, 70, 65, 67, 73, 71, 72, 69, 64, 65, 68, 75, 70, 73, 72, 66, 63, 74, 76, 71, 69, 70, 79, 68, 76, 69, 79, 76, 63],
+      pointStyle: 'rect'
     }, {
       type: 'bar',
       label: 'OHCA',
       backgroundcolor: 'rgba(255,99,132, 0.8)',
       bordercolor: 'rgb(255,99,132)' ,
-      data: [10, 9, 12, 11, 13, 7, 8, 8, 12, 13, 11, 9, 14, 7, 10, 12, 9, 13, 14, 11, 10, 7, 13, 12, 10, 15, 11, 14, 12, 12, 9]
+      data: [10, 9, 12, 11, 13, 7, 8, 8, 12, 13, 11, 9, 14, 7, 10, 12, 9, 13, 14, 11, 10, 7, 13, 12, 10, 15, 11, 14, 12, 12, 9],
+      hidden: true,
+      pointStyle: 'rect'
     }, {
       type: 'bar',
       label: 'Sespsis',
       backgroundcolor: 'rgba(75,192,192, 0.8)' ,
       bordercolor: 'rgb(75,192,192)',
-      data: [6, 8, 10, 7, 8 ,11, 6, 9, 10, 7, 8, 8, 12, 10, 9, 9, 11, 8, 10, 9, 7, 10, 9, 12, 13, 10, 8, 9, 9]
+      data: [6, 8, 10, 7, 8 ,11, 6, 9, 10, 7, 8, 8, 12, 10, 9, 9, 11, 8, 10, 9, 7, 10, 9, 12, 13, 10, 8, 9, 9],
+      hidden: true,
+      pointStyle: 'rect'
     }, {
       type: 'line',
       label: 'CAP vorige jaren',
       backgroundcolor: 'rgb(54,162,235)',
       bordercolor: 'rgb(54,162,235)' ,
       data: [84, 70, 73, 73, 72, 74, 77, 71, 70, 76, 67, 69, 73, 75, 70, 75, 73, 72, 68, 73, 79, 70, 75, 73, 82, 72, 79, 69, 71, 78, 70],
+      pointStyle: 'circle'
     }, {
       type: 'line',
       label: 'OHCA vorige jaren',
       backgroundcolor:'rgb(255,99,132)' ,
       bordercolor: 'rgb(255,99,132)',
-      data: [20, 15, 18, 19, 16, 19, 15, 19, 16, 12, 20, 19, 17, 18, 16, 17, 22, 19, 15, 20, 17, 21, 18, 19, 19, 23, 21, 17, 14, 24, 13]
+      data: [20, 15, 18, 19, 16, 19, 15, 19, 16, 12, 20, 19, 17, 18, 16, 17, 22, 19, 15, 20, 17, 21, 18, 19, 19, 23, 21, 17, 14, 24, 13],
+      hidden: true,
+      pointStyle: 'circle'
     }, {
       type: 'line',
       label: 'Sespsis vorige jaren',
       backgroundcolor: 'rgb(75,192,192)',
       bordercolor: 'rgb(75,192,192)',
-      data: [15, 16, 17, 12, 18, 15, 12, 16, 13, 15, 12, 14, 17, 16, 13, 15, 13, 18, 17, 15, 13, 16, 14, 19, 16, 15, 10, 17, 15, 19, 18]
+      data: [15, 16, 17, 12, 18, 15, 12, 16, 13, 15, 12, 14, 17, 16, 13, 15, 13, 18, 17, 15, 13, 16, 14, 19, 16, 15, 10, 17, 15, 19, 18],
+      hidden: true,
+      pointStyle: 'circle'
     }],
     labels: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31']
   };
 
   var maandDiagnoseChartOptions = {
+    plugins: {
+        legend: {
+          onHover: function(event) {
+            event.native.target.style.cursor = 'pointer';
+          },
+          onLeave: function(event){
+            event.native.target.style.cursor = 'default';
+          },
+          labels: {
+            usePointStyle: true,
+            }
+        }
+    },
     scales: {
       x: {
-        title:{color:'red', display: true, text: "VUL HIER TEXT IN VOOR X-AS TITEL"},
+        title:{color:'black', display: true, text: "DATUM (dagen)"},
       },
       y: {
-        title:{color:'red', display: true, text: "VUL HIER TEXT IN VOOR Y-AS TITEL"}
+        title:{color:'black', display: true, text: "AANTAL IC-OPNAMES"}
       },
     },
   };
@@ -703,84 +780,119 @@ maakMaandGrafiekOpnamesLeeftijd = function(referentieData40Min, referentieData40
       label: 'gem. 18-40 Jaar',
       data: referentieData40Min,
       backgroundColor: 'rgb(54,162,235)',
-      borderColor: 'rgb(54,162,235)'
+      borderColor: 'rgb(54,162,235)',
+      pointStyle: 'circle'
     }, {
       type: 'line',
       label: 'gem. 40-50 Jaar',
       data: referentieData4050,
       backgroundColor: 'rgb(255,99,132)',
-      borderColor: 'rgb(255,99,132)'
+      borderColor: 'rgb(255,99,132)',
+      hidden: true,
+      pointStyle: 'circle'
     }, {
       type: 'line',
       label: 'gem. 50-60 Jaar',
       data: referentieData5060,
       backgroundColor: 'rgb(75,192,192)',
-      borderColor: 'rgb(75,192,192)'
+      borderColor: 'rgb(75,192,192)',
+      hidden: true,
+      pointStyle: 'circle'
     }, {
       type: 'line',
       label: 'gem. 60-70 Jaar',
       data: referentieData6070,
       backgroundColor: 'rgb(255,159,64)',
-      borderColor: 'rgb(255,159,64)'
+      borderColor: 'rgb(255,159,64)',
+      hidden: true,
+      pointStyle: 'circle'
     }, {
       type: 'line',
       label: 'gem. 70-80 Jaar',
       data: referentieData7080,
       backgroundColor: 'rgb(153,102,255)',
-      borderColor: 'rgb(153,102,255)'
+      borderColor: 'rgb(153,102,255)',
+      hidden: true,
+      pointStyle: 'circle'
     }, {
       type: 'line',
       label: 'gem. 80+ Jaar',
       data: referentieData80Plus,
       backgroundColor: 'rgb(255,205,86)',
-      borderColor: 'rgb(255,205,86)'
+      borderColor: 'rgb(255,205,86)',
+      hidden: true,
+      pointStyle: 'circle'
     }, {
       type: 'bar',
       label: '18-40 Jaar',
       data: data40Min,
       backgroundColor: 'rgba(54,162,235, 0.8)',
-      bordercolor: 'rgb(54,162,235)'
+      bordercolor: 'rgb(54,162,235)',
+      pointStyle: 'rect'
 
     }, {
       type: 'bar',
       label: '40-50 Jaar',
       data: data4050,
       backgroundColor: 'rgba(255,99,132, 0.8)',
-      bordercolor: 'rgb(255,99,132)'
+      bordercolor: 'rgb(255,99,132)',
+      hidden: true,
+      pointStyle: 'rect'
     }, {
       type: 'bar',
       label: '50-60 Jaar',
       data: data5060,
       backgroundColor: 'rgba(75,192,192, 0.8)',
-      bordercolor: 'rgb(75,192,192)'
+      bordercolor: 'rgb(75,192,192)',
+      hidden: true,
+      pointStyle: 'rect'
     }, {
       type: 'bar',
       label: '60-70 Jaar',
       data: data6070,
       backgroundColor: 'rgba(255,159,64, 0.8)',
-      bordercolor: 'rgb(255,159,64)'
+      bordercolor: 'rgb(255,159,64)',
+      hidden: true,
+      pointStyle: 'rect'
     }, {
       type: 'bar',
       label: '70-80 Jaar',
       data: data7080,
       backgroundColor: 'rgba(153,102,255, 0.8)',
-      bordercolor: 'rgb(153,102,255)'
+      bordercolor: 'rgb(153,102,255)',
+      hidden: true,
+      pointStyle: 'rect'
     }, {
       type: 'bar',
       label: '80+ Jaar',
       data: data80Plus,
       backgroundColor: 'rgba(255,205,86, 0.8)',
-      bordercolor: 'rgb(255,205,86)'
+      bordercolor: 'rgb(255,205,86)',
+      hidden: true,
+      pointStyle: 'rect'
     }],
-    labels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]
+    labels: ["Week 18", "Week 19" , "Week 20", "Week 21"]
   };
   var maandGrafiekOpnamesLeeftijdOptions = {
+    plugins: {
+        legend: {
+          onHover: function(event) {
+            event.native.target.style.cursor = 'pointer';
+          },
+          onLeave: function(event){
+            event.native.target.style.cursor = 'default';
+          },
+          labels: {
+            usePointStyle: true,
+            }
+        }
+    },
     scales: {
       x: {
-        title:{color:'red', display: true, text: "VUL HIER TEXT IN VOOR X-AS TITEL"},
+        title:{color:'black', display: true, text: "DATUM (weeknummer)"},
       },
       y: {
-        title:{color:'red', display: true, text: "VUL HIER TEXT IN VOOR Y-AS TITEL"}
+        title:{color:'black', display: true, text: "AANTAL IC-OPNAMES"}
       },
     },
   }
@@ -798,32 +910,57 @@ maakGrafiekMedischeLeeftijd = function(medischeLeeftijdData, referentieMedischeL
   var medischLeeftijdData = {
     labels: ['18-40 jaar', '40-50 jaar', '50-60 jaar', '60-70 jaar', '70-80 jaar', '80+ jaar'],
     datasets: [{
-      label: ['mei 2023'],
+      label: 'mei 2023',
       data: medischeLeeftijdData,
-      backgroundColor: ['rgb(54,162,235)', 'rgb(255,99,132)', 'rgb(75,192,192)', 'rgb(255,159,64)', 'rgb(153,102,255)', 'rgb(255,205,86)']
+      backgroundColor: 'rgba(54,162,235,0.5)', 
+      borderColor: 'rgba(54,162,235,1)', 
+      type: 'bar',
+      pointStyle: 'rect'
     }, {
-      label: ['gem. mei 2021/2022'],
+      label: 'gem. mei 2021/2022',
       data: referentieMedischeLeeftijdData,
-      backgroundColor: ['rgb(54,162,235)', 'rgb(255,99,132)', 'rgb(75,192,192)', 'rgb(255,159,64)', 'rgb(153,102,255)', 'rgb(255,205,86)']
+      fill: false, 
+      borderColor: 'rgb(255,99,132)', 
+      type: 'line', 
+      pointStyle: 'circle'
     }]
   };
   var medischeLeeftijdOptions = {
     plugins: {
+      legend: {
+        onHover: function(event) {
+          event.native.target.style.cursor = 'pointer';
+        },
+        onLeave: function(event){
+          event.native.target.style.cursor = 'default';
+        },
+        labels:{
+          usePointStyle: true,
+        }
+      },
       title: {
         display: true,
         text: 'Leeftijdsverdeling van medische opnames'
       }
-    }
+    },
+    scales: {
+      x: {
+        title:{color:'black', display: true, text: "LEEFTIJDSGROEP"}
+      },
+      y: {
+        title:{color:'black', display: true, text: "AANTAL IC-OPNAMES (Medisch)"}
+      },
+    },
   };
   var medischeLeeftijdChartCtx = document.getElementById('medischeLeeftijd').getContext('2d');
-
   const medischeLeeftijdChart = new Chart(medischeLeeftijdChartCtx, {
+    type: 'bar',
     data: medischLeeftijdData,
-    type: 'pie',
     options: medischeLeeftijdOptions
   });
   return medischeLeeftijdChart;
 };
+
 
 //GRAFIEK leeftijdsverdeling van spoed opnames
 maakGrafiekSpoedLeeftijd = function(spoedeLeeftijdData, referentieSpoedeLeeftijdData){
@@ -832,30 +969,55 @@ maakGrafiekSpoedLeeftijd = function(spoedeLeeftijdData, referentieSpoedeLeeftijd
     datasets: [{
       label: ['mei 2023'],
       data: spoedeLeeftijdData,
-      backgroundColor: ['rgb(54,162,235)', 'rgb(255,99,132)', 'rgb(75,192,192)', 'rgb(255,159,64)', 'rgb(153,102,255)', 'rgb(255,205,86)']
+      backgroundColor: 'rgba(54,162,235,0.5)', 
+      borderColor: 'rgba(54,162,235,1)', 
+      type: 'bar',
+      pointStyle: 'rect'
     }, {
       label: ['gem. mei 2021/2022'],
       data: referentieSpoedeLeeftijdData,
-      backgroundColor: ['rgb(54,162,235)', 'rgb(255,99,132)', 'rgb(75,192,192)', 'rgb(255,159,64)', 'rgb(153,102,255)', 'rgb(255,205,86)']
+      fill: false, 
+      borderColor: 'rgb(255,99,132)', 
+      type: 'line', 
+      pointStyle: 'circle'
     }]
   };
   var spoedLeeftijdOptions = {
     plugins: {
+      legend:{
+        onHover: function(event) {
+          event.native.target.style.cursor = 'pointer';
+        },
+        onLeave: function(event){
+          event.native.target.style.cursor = 'default';
+        },
+        labels:{
+          usePointStyle: true,
+        }
+      },
       title: {
         display: true,
         text: 'Leeftijdsverdeling van spoed opnames'
       }
-    }
+    },
+    scales: {
+      x: {
+        title:{color:'black', display: true, text: "LEEFTIJDSGROEP"}
+      },
+      y: {
+        title:{color:'black', display: true, text: "AANTAL IC-OPNAMES (Spoed)"}
+      },
+    },
   };
   var spoedLeeftijdChartCtx = document.getElementById('spoedLeeftijd').getContext('2d');
 
   const spoedLeeftijdChart = new Chart(spoedLeeftijdChartCtx, {
     data: spoedLeeftijdData,
-    type: 'pie',
     options: spoedLeeftijdOptions
   });
   return spoedLeeftijdChart;
 };
+
 
 //GRAFIEK leeftijdsverdeling van geplande opnames
 maakGrafiekGeplandeLeeftijd = function(geplandeLeeftijdData, referentieGeplandeLeeftijdData){
@@ -864,29 +1026,72 @@ maakGrafiekGeplandeLeeftijd = function(geplandeLeeftijdData, referentieGeplandeL
     datasets: [{
       label: ['mei 2023'],
       data: geplandeLeeftijdData,
-      backgroundColor: ['rgb(54,162,235)', 'rgb(255,99,132)', 'rgb(75,192,192)', 'rgb(255,159,64)', 'rgb(153,102,255)', 'rgb(255,205,86)']
+      backgroundColor: 'rgba(54,162,235,0.5)', 
+      borderColor: 'rgba(54,162,235,1)',
+      type: 'bar',
+      pointStyle: 'rect'
     }, {
       label: ['gem. mei 2021/2022'],
       data: referentieGeplandeLeeftijdData,
-      backgroundColor: ['rgb(54,162,235)', 'rgb(255,99,132)', 'rgb(75,192,192)', 'rgb(255,159,64)', 'rgb(153,102,255)', 'rgb(255,205,86)']
+      fill: false, 
+      borderColor: 'rgb(255,99,132)', 
+      type: 'line',
+      pointStyle: 'circle'
     }]
   };
   var geplandLeeftijdOptions = {
     plugins: {
+      legend:{
+        onHover: function(event) {
+          event.native.target.style.cursor = 'pointer';
+        },
+        onLeave: function(event){
+          event.native.target.style.cursor = 'default';
+        },
+        labels: {
+          usePointStyle: true,
+        }
+      },
       title: {
         display: true,
         text: 'Leeftijdsverdeling van geplande opnames'
       }
-    }
+    },
+    scales: {
+      x: {
+        title:{color:'black', display: true, text: "LEEFTIJDSGROEP"}
+      },
+      y: {
+        title:{color:'black', display: true, text: "AANTAL IC-OPNAMES (Gepland)"},
+      },
+    },
   };
   var geplandLeeftijdChartCtx = document.getElementById('geplandLeeftijd').getContext('2d');
 
   const geplandLeeftijdChart = new Chart(geplandLeeftijdChartCtx, {
     data: geplandLeeftijdData,
-    type: 'pie',
     options: geplandLeeftijdOptions
   });
   return geplandLeeftijdChart;
 };
 
 
+// Deze functie halveert de waarde van elk van de waardes in de array. Dit wordt gebruikt om gemiddelde aantallen te berekenen in de referentie arrays
+halveer = function(array){
+  array.map(x => x / 2);
+  return array;
+};
+
+// Deze functie zorgt ervoor dat een array van dagen, naar weken omgezet kan worden.
+function groepeerPerWeek(data) {
+  let wekelijkseData = [];
+  for (let i = 0; i < data.length; i += 7) {
+    // Bereken de som van de waarden voor een week (7 dagen)
+    let weekTotaal = 0;
+    for (let j = i; j < i + 7 && j < data.length; j++) {
+      weekTotaal += data[j];
+    }
+    wekelijkseData.push(weekTotaal);
+  }
+  return wekelijkseData;
+}
