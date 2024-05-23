@@ -553,17 +553,19 @@ maakMaandGrafiekOpnames = function(data, referentieData) {
     datasets: [{
       type: 'bar',
       label: 'Aantal opnames',
-      backgroundcolor: 'rgba(54,162,235, 0.8)',
+      backgroundcolor: 'rgba(54,162,235, 0.5)',
       bordercolor: 'rgb(54,162,235)',
       data: data,
-      pointStyle: 'rect'
+      pointStyle: 'rect',
+      order: 2
     }, {
       type: 'line',
-      label: 'Gemiddeld aantal opnames van vorige jaren',
+      label: 'Gem. aantal opnames in 2021/2022',
       backgroundcolor: 'rgb(255,99,132)',
       bordercolor: 'rgb(255,99,132)',
       data: referentieData,
-      pointStyle: 'circle'
+      pointStyle: 'circle',
+      order: 1
     }],
     labels: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31']
     
@@ -585,12 +587,25 @@ maakMaandGrafiekOpnames = function(data, referentieData) {
         onLeave: function(event){
           event.native.target.style.cursor = 'default';
         },
-        labels:{
+        labels: {
           usePointStyle: true,
-          }
+          generateLabels: function(chart) {
+            const data = chart.data;
+            return data.datasets.map((dataset, i) => {
+              return {
+                text: dataset.label,
+                fillStyle: dataset.backgroundColor,
+                strokeStyle: dataset.borderColor,
+                hidden: !chart.isDatasetVisible(i),
+                datasetIndex: i, // Belangrijk voor togglen van zichtbaarheid
+                pointStyle: i === 0 ? 'rect' : 'line' // Stel pointStyle in voor de legend items
+              };
+            });
           }
         }
-      };
+      }
+    }
+  };
   var maandChartCtx = document.getElementById('maandChart').getContext('2d');
 
   const maandChart = new Chart(maandChartCtx, {
@@ -608,65 +623,84 @@ maakMaandGrafiekOpnametypes = function(dataMedisch, dataSpoed, dataGepland, refe
       type: 'bar',
       label: 'Aantal Medische opnames',
       data: dataMedisch,
-      backgroundColor: 'rgba(54,162,235, 0.8)',
-      borderColor: 'rgba(54,162,235)',
-      pointStyle: 'rect'
+      backgroundColor: 'rgba(54,162,235, 0.5)',
+      borderColor: 'rgb(54,162,235)',
+      pointStyle: 'rect',
+      order: 2
     }, {
       type: 'bar',
-      label: 'Aantal Spoed chirurgische opnames',
+      label: 'Aantal Spoed opnames',
       data: dataSpoed,
-      backgroundColor: 'rgba(255,99,132, 0.8)',
-      borderColor: 'rgba(255,99,132)',
+      backgroundColor: 'rgba(255,99,132, 0.5)',
+      borderColor: 'rgb(255,99,132)',
       hidden: true,
-      pointStyle: 'rect'
+      pointStyle: 'rect',
+      order: 2
     }, {
       type: 'bar',
-      label: 'Aantal Gepland chirurgische opnames',
+      label: 'Aantal Geplande opnames',
       data: dataGepland,
-      backgroundColor: 'rgba(75,192,192, 0.8)',
-      borderColor: 'rgba(75,192,192)',
+      backgroundColor: 'rgba(75,192,192, 0.5)',
+      borderColor: 'rgb(75,192,192)',
       hidden: true,
-      pointStyle: 'rect'
+      pointStyle: 'rect',
+      order: 2
     }, {
       type: 'line',
-      label: 'Aantal Medische opnames in vorige jaren',
+      label: 'Gem. aantal Medische opnames in 2021/2022',
       data: referentieDataMedisch,
-      backgroundColor: 'rgba(54,162,235)',
-      borderColor: 'rgba(54,162,235)',
-      pointStyle: 'circle'
+      backgroundColor: 'rgb(54,162,235)',
+      borderColor: 'rgb(54,162,235)',
+      pointStyle: 'circle',
+      order: 1
     }, {
       type: 'line',
-      label: 'Aantal Spoed chirurgische opnames in vorige jaren',
+      label: 'Gem. aantal Spoed opnames in 2021/2022',
       data: referentieDataSpoed,
-      backgroundColor: 'rgba(255,99,132)',
-      borderColor: 'rgba(255,99,132)',
+      backgroundColor: 'rgb(255,99,132)',
+      borderColor: 'rgb(255,99,132)',
       hidden: true,
-      pointStyle: 'circle'
+      pointStyle: 'circle',
+      order: 1
     }, {
       type: 'line',
-      label: 'Aantal Gepland chirurgische opnames in vorige jaren',
+      label: 'Gem. aantal Geplande opnames in 2021/2022',
       data: referentieDataGepland,
       backgroundColor: 'rgba(75,192,192)',
       borderColor: 'rgba(75,192,192)',
       hidden: true,
-      pointStyle: 'circle'
+      pointStyle: 'circle',
+      order: 1
     }],
     labels: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31']
   };
 
   var maandOpnametypesChartOptions = {
     plugins: {
-        legend: {
-          onHover: function(event) {
-            event.native.target.style.cursor = 'pointer';
-          },
-          onLeave: function(event){
-            event.native.target.style.cursor = 'default';
-          },
-          labels: {
-            usePointStyle: true,
-            }
+      legend: {
+        onHover: function(event) {
+          event.native.target.style.cursor = 'pointer';
+        },
+        onLeave: function(event){
+          event.native.target.style.cursor = 'default';
+        },
+        labels: {
+          usePointStyle: true,
+          generateLabels: function(chart) {
+            const data = chart.data;
+            return data.datasets.map((dataset, i) => {
+              return {
+                text: dataset.label,
+                fillStyle: dataset.backgroundColor,
+                strokeStyle: dataset.borderColor,
+                hidden: !chart.isDatasetVisible(i),
+                datasetIndex: i, // Belangrijk voor togglen van zichtbaarheid
+                pointStyle: i < 3 ? 'rect' : 'line' // Stel pointStyle in voor de legend items
+              };
+            });
+          }
         }
+      }
     },
     scales: {
       x: {
@@ -691,67 +725,86 @@ maakMaandGrafiekDiagnose = function() {
   var maandDiagnoseChartData = {
     datasets: [{
       type: 'bar',
-      label: 'CAP',
-      backgroundcolor: 'rgba(54,162,235, 0.8)' ,
-      bordercolor: 'rgb(54,162,235)' ,
+      label: 'Aantal Community Acquired Pneumonie (CAP)',
       data: [68, 69, 68, 70, 65, 67, 73, 71, 72, 69, 64, 65, 68, 75, 70, 73, 72, 66, 63, 74, 76, 71, 69, 70, 79, 68, 76, 69, 79, 76, 63],
-      pointStyle: 'rect'
+      backgroundcolor: 'rgba(54,162,235, 0.5)',
+      bordercolor: 'rgb(54,162,235)',
+      pointStyle: 'rect',
+      order: 2
     }, {
       type: 'bar',
-      label: 'OHCA',
-      backgroundcolor: 'rgba(255,99,132, 0.8)',
-      bordercolor: 'rgb(255,99,132)' ,
+      label: 'Aantal Out of Hospital Cardiac Arrests (OHCA)',
       data: [10, 9, 12, 11, 13, 7, 8, 8, 12, 13, 11, 9, 14, 7, 10, 12, 9, 13, 14, 11, 10, 7, 13, 12, 10, 15, 11, 14, 12, 12, 9],
+      backgroundcolor: 'rgba(255,99,132, 0.5)',
+      bordercolor: 'rgb(255,99,132)' ,
       hidden: true,
-      pointStyle: 'rect'
+      pointStyle: 'rect',
+      order: 2
     }, {
       type: 'bar',
-      label: 'Sespsis',
-      backgroundcolor: 'rgba(75,192,192, 0.8)' ,
-      bordercolor: 'rgb(75,192,192)',
+      label: 'Aantal sepsis',
       data: [6, 8, 10, 7, 8 ,11, 6, 9, 10, 7, 8, 8, 12, 10, 9, 9, 11, 8, 10, 9, 7, 10, 9, 12, 13, 10, 8, 9, 9],
+      backgroundcolor: 'rgba(75,192,192, 0.5)' ,
+      bordercolor: 'rgb(75,192,192)',
       hidden: true,
-      pointStyle: 'rect'
+      pointStyle: 'rect',
+      order: 2
     }, {
       type: 'line',
-      label: 'CAP vorige jaren',
-      backgroundcolor: 'rgb(54,162,235)',
-      bordercolor: 'rgb(54,162,235)' ,
+      label: 'Gem. aantal CAP in 2021/2022',
       data: [84, 70, 73, 73, 72, 74, 77, 71, 70, 76, 67, 69, 73, 75, 70, 75, 73, 72, 68, 73, 79, 70, 75, 73, 82, 72, 79, 69, 71, 78, 70],
-      pointStyle: 'circle'
+      backgroundcolor: 'rgba(54,162,235)',
+      bordercolor: 'rgba(54,162,235)',
+      pointStyle: 'circle',
+      order: 1
     }, {
       type: 'line',
-      label: 'OHCA vorige jaren',
-      backgroundcolor:'rgb(255,99,132)' ,
-      bordercolor: 'rgb(255,99,132)',
+      label: 'Gem. aantal OHCA in 2021/2022',
       data: [20, 15, 18, 19, 16, 19, 15, 19, 16, 12, 20, 19, 17, 18, 16, 17, 22, 19, 15, 20, 17, 21, 18, 19, 19, 23, 21, 17, 14, 24, 13],
+      backgroundcolor:'rgb(255,99,132)',
+      bordercolor: 'rgb(255,99,132)',
       hidden: true,
-      pointStyle: 'circle'
+      pointStyle: 'circle',
+      order: 1
     }, {
       type: 'line',
-      label: 'Sespsis vorige jaren',
+      label: 'Gem. aantal sepsis in 2021/2022',
+      data: [15, 16, 17, 12, 18, 15, 12, 16, 13, 15, 12, 14, 17, 16, 13, 15, 13, 18, 17, 15, 13, 16, 14, 19, 16, 15, 10, 17, 15, 19, 18],
       backgroundcolor: 'rgb(75,192,192)',
       bordercolor: 'rgb(75,192,192)',
-      data: [15, 16, 17, 12, 18, 15, 12, 16, 13, 15, 12, 14, 17, 16, 13, 15, 13, 18, 17, 15, 13, 16, 14, 19, 16, 15, 10, 17, 15, 19, 18],
       hidden: true,
-      pointStyle: 'circle'
+      pointStyle: 'circle',
+      order: 1
     }],
     labels: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31']
   };
 
   var maandDiagnoseChartOptions = {
     plugins: {
-        legend: {
-          onHover: function(event) {
-            event.native.target.style.cursor = 'pointer';
-          },
-          onLeave: function(event){
-            event.native.target.style.cursor = 'default';
-          },
-          labels: {
-            usePointStyle: true,
-            }
+      legend: {
+        onHover: function(event) {
+          event.native.target.style.cursor = 'pointer';
+        },
+        onLeave: function(event){
+          event.native.target.style.cursor = 'default';
+        },
+        labels: {
+          usePointStyle: true,
+          generateLabels: function(chart) {
+            const data = chart.data;
+            return data.datasets.map((dataset, i) => {
+              return {
+                text: dataset.label,
+                fillStyle: dataset.backgroundColor,
+                strokeStyle: dataset.borderColor,
+                hidden: !chart.isDatasetVisible(i),
+                datasetIndex: i, // Belangrijk voor togglen van zichtbaarheid
+                pointStyle: i < 3 ? 'rect' : 'line' // Stel pointStyle in voor de legend items
+              };
+            });
+          }
         }
+      }
     },
     scales: {
       x: {
@@ -776,116 +829,140 @@ maakMaandGrafiekDiagnose = function() {
 maakMaandGrafiekOpnamesLeeftijd = function(referentieData40Min, referentieData4050, referentieData5060, referentieData6070, referentieData7080, referentieData80Plus, data40Min, data4050, data5060, data6070, data7080, data80Plus) {
   var maandGrafiekOpnamesLeeftijd = {
     datasets: [{
-      type: 'line',
-      label: 'gem. 18-40 Jaar',
-      data: referentieData40Min,
-      backgroundColor: 'rgb(54,162,235)',
-      borderColor: 'rgb(54,162,235)',
-      pointStyle: 'circle'
-    }, {
-      type: 'line',
-      label: 'gem. 40-50 Jaar',
-      data: referentieData4050,
-      backgroundColor: 'rgb(255,99,132)',
-      borderColor: 'rgb(255,99,132)',
-      hidden: true,
-      pointStyle: 'circle'
-    }, {
-      type: 'line',
-      label: 'gem. 50-60 Jaar',
-      data: referentieData5060,
-      backgroundColor: 'rgb(75,192,192)',
-      borderColor: 'rgb(75,192,192)',
-      hidden: true,
-      pointStyle: 'circle'
-    }, {
-      type: 'line',
-      label: 'gem. 60-70 Jaar',
-      data: referentieData6070,
-      backgroundColor: 'rgb(255,159,64)',
-      borderColor: 'rgb(255,159,64)',
-      hidden: true,
-      pointStyle: 'circle'
-    }, {
-      type: 'line',
-      label: 'gem. 70-80 Jaar',
-      data: referentieData7080,
-      backgroundColor: 'rgb(153,102,255)',
-      borderColor: 'rgb(153,102,255)',
-      hidden: true,
-      pointStyle: 'circle'
-    }, {
-      type: 'line',
-      label: 'gem. 80+ Jaar',
-      data: referentieData80Plus,
-      backgroundColor: 'rgb(255,205,86)',
-      borderColor: 'rgb(255,205,86)',
-      hidden: true,
-      pointStyle: 'circle'
-    }, {
       type: 'bar',
       label: '18-40 Jaar',
       data: data40Min,
-      backgroundColor: 'rgba(54,162,235, 0.8)',
+      backgroundColor: 'rgba(54,162,235, 0.5)',
       bordercolor: 'rgb(54,162,235)',
-      pointStyle: 'rect'
-
+      pointStyle: 'rect',
+      order: 2
     }, {
       type: 'bar',
       label: '40-50 Jaar',
       data: data4050,
-      backgroundColor: 'rgba(255,99,132, 0.8)',
+      backgroundColor: 'rgba(255,99,132, 0.5)',
       bordercolor: 'rgb(255,99,132)',
       hidden: true,
-      pointStyle: 'rect'
+      pointStyle: 'rect',
+      order: 2
     }, {
       type: 'bar',
       label: '50-60 Jaar',
       data: data5060,
-      backgroundColor: 'rgba(75,192,192, 0.8)',
+      backgroundColor: 'rgba(75,192,192, 0.5)',
       bordercolor: 'rgb(75,192,192)',
       hidden: true,
-      pointStyle: 'rect'
+      pointStyle: 'rect',
+      order: 2
     }, {
       type: 'bar',
       label: '60-70 Jaar',
       data: data6070,
-      backgroundColor: 'rgba(255,159,64, 0.8)',
+      backgroundColor: 'rgba(255,159,64, 0.5)',
       bordercolor: 'rgb(255,159,64)',
       hidden: true,
-      pointStyle: 'rect'
+      pointStyle: 'rect',
+      order: 2
     }, {
       type: 'bar',
       label: '70-80 Jaar',
       data: data7080,
-      backgroundColor: 'rgba(153,102,255, 0.8)',
+      backgroundColor: 'rgba(153,102,255, 0.5)',
       bordercolor: 'rgb(153,102,255)',
       hidden: true,
-      pointStyle: 'rect'
+      pointStyle: 'rect',
+      order: 2
     }, {
       type: 'bar',
       label: '80+ Jaar',
       data: data80Plus,
-      backgroundColor: 'rgba(255,205,86, 0.8)',
+      backgroundColor: 'rgba(255,205,86, 0.5)',
       bordercolor: 'rgb(255,205,86)',
       hidden: true,
-      pointStyle: 'rect'
+      pointStyle: 'rect',
+      order: 2
+    }, {
+      type: 'line',
+      label: 'Gem. 18-40 Jaar',
+      data: referentieData40Min,
+      backgroundColor: 'rgb(54,162,235)',
+      borderColor: 'rgb(54,162,235)',
+      pointStyle: 'circle',
+      order: 1
+    }, {
+      type: 'line',
+      label: 'Gem. 40-50 Jaar',
+      data: referentieData4050,
+      backgroundColor: 'rgb(255,99,132)',
+      borderColor: 'rgb(255,99,132)',
+      hidden: true,
+      pointStyle: 'circle',
+      order: 1
+    }, {
+      type: 'line',
+      label: 'Gem. 50-60 Jaar',
+      data: referentieData5060,
+      backgroundColor: 'rgb(75,192,192)',
+      borderColor: 'rgb(75,192,192)',
+      hidden: true,
+      pointStyle: 'circle',
+      order: 1
+    }, {
+      type: 'line',
+      label: 'Gem. 60-70 Jaar',
+      data: referentieData6070,
+      backgroundColor: 'rgb(255,159,64)',
+      borderColor: 'rgb(255,159,64)',
+      hidden: true,
+      pointStyle: 'circle',
+      order: 1
+    }, {
+      type: 'line',
+      label: 'Gem. 70-80 Jaar',
+      data: referentieData7080,
+      backgroundColor: 'rgb(153,102,255)',
+      borderColor: 'rgb(153,102,255)',
+      hidden: true,
+      pointStyle: 'circle',
+      order: 1
+    }, {
+      type: 'line',
+      label: 'Gem. 80+ Jaar',
+      data: referentieData80Plus,
+      backgroundColor: 'rgb(255,205,86)',
+      borderColor: 'rgb(255,205,86)',
+      hidden: true,
+      pointStyle: 'circle',
+      order: 1
     }],
     labels: ["Week 18", "Week 19" , "Week 20", "Week 21"]
   };
   var maandGrafiekOpnamesLeeftijdOptions = {
     plugins: {
-        legend: {
-          onHover: function(event) {
-            event.native.target.style.cursor = 'pointer';
-          },
-          onLeave: function(event){
-            event.native.target.style.cursor = 'default';
-          },
-          labels: {
-            usePointStyle: true,
-            }
+      legend: {
+        onHover: function(event) {
+          event.native.target.style.cursor = 'pointer';
+        },
+        onLeave: function(event){
+          event.native.target.style.cursor = 'default';
+        },
+        labels: {
+          usePointStyle: true,
+          generateLabels: function(chart) {
+            const data = chart.data;
+            return data.datasets.map((dataset, i) => {
+              return {
+                text: dataset.label,
+                fillStyle: dataset.backgroundColor,
+                strokeStyle: dataset.borderColor,
+                hidden: !chart.isDatasetVisible(i),
+                datasetIndex: i,
+                pointStyle: i < 6 ? 'rect' : 'line'
+              };
+            });
+          }
         }
+      }
     },
     scales: {
       x: {
@@ -910,19 +987,21 @@ maakGrafiekMedischeLeeftijd = function(medischeLeeftijdData, referentieMedischeL
   var medischLeeftijdData = {
     labels: ['18-40 jaar', '40-50 jaar', '50-60 jaar', '60-70 jaar', '70-80 jaar', '80+ jaar'],
     datasets: [{
-      label: 'mei 2023',
+      label: 'Mei 2023',
       data: medischeLeeftijdData,
       backgroundColor: 'rgba(54,162,235,0.5)', 
       borderColor: 'rgba(54,162,235,1)', 
       type: 'bar',
-      pointStyle: 'rect'
+      pointStyle: 'rect',
+      order: 2
     }, {
-      label: 'gem. mei 2021/2022',
+      label: 'Gem. mei 2021/2022',
       data: referentieMedischeLeeftijdData,
       fill: false, 
       borderColor: 'rgb(255,99,132)', 
       type: 'line', 
-      pointStyle: 'circle'
+      pointStyle: 'circle',
+      order: 1
     }]
   };
   var medischeLeeftijdOptions = {
@@ -934,8 +1013,21 @@ maakGrafiekMedischeLeeftijd = function(medischeLeeftijdData, referentieMedischeL
         onLeave: function(event){
           event.native.target.style.cursor = 'default';
         },
-        labels:{
+        labels: {
           usePointStyle: true,
+          generateLabels: function(chart) {
+            const data = chart.data;
+            return data.datasets.map((dataset, i) => {
+              return {
+                text: dataset.label,
+                fillStyle: dataset.backgroundColor,
+                strokeStyle: dataset.borderColor,
+                hidden: !chart.isDatasetVisible(i),
+                datasetIndex: i, // Belangrijk voor togglen van zichtbaarheid
+                pointStyle: i === 0 ? 'rect' : 'line' // Stel pointStyle in voor de legend items
+              };
+            });
+          }
         }
       },
       title: {
@@ -961,25 +1053,27 @@ maakGrafiekMedischeLeeftijd = function(medischeLeeftijdData, referentieMedischeL
   return medischeLeeftijdChart;
 };
 
-
 //GRAFIEK leeftijdsverdeling van spoed opnames
 maakGrafiekSpoedLeeftijd = function(spoedeLeeftijdData, referentieSpoedeLeeftijdData){
   var spoedLeeftijdData = {
     labels: ['18-40 jaar', '40-50 jaar', '50-60 jaar', '60-70 jaar', '70-80 jaar', '80+ jaar'],
     datasets: [{
-      label: ['mei 2023'],
+      label: ['Mei 2023'],
       data: spoedeLeeftijdData,
       backgroundColor: 'rgba(54,162,235,0.5)', 
       borderColor: 'rgba(54,162,235,1)', 
       type: 'bar',
-      pointStyle: 'rect'
+      pointStyle: 'rect',
+      order: 2
     }, {
-      label: ['gem. mei 2021/2022'],
+      label: ['Gem. mei 2021/2022'],
       data: referentieSpoedeLeeftijdData,
       fill: false, 
-      borderColor: 'rgb(255,99,132)', 
+      borderColor: 'rgb(255,99,132)',
+      backgroundColor:  'rgb(255,99,132)',
       type: 'line', 
-      pointStyle: 'circle'
+      pointStyle: 'circle',
+      order: 1
     }]
   };
   var spoedLeeftijdOptions = {
@@ -991,8 +1085,21 @@ maakGrafiekSpoedLeeftijd = function(spoedeLeeftijdData, referentieSpoedeLeeftijd
         onLeave: function(event){
           event.native.target.style.cursor = 'default';
         },
-        labels:{
+        labels: {
           usePointStyle: true,
+          generateLabels: function(chart) {
+            const data = chart.data;
+            return data.datasets.map((dataset, i) => {
+              return {
+                text: dataset.label,
+                fillStyle: dataset.backgroundColor,
+                strokeStyle: dataset.borderColor,
+                hidden: !chart.isDatasetVisible(i),
+                datasetIndex: i, // Belangrijk voor togglen van zichtbaarheid
+                pointStyle: i === 0 ? 'rect' : 'line' // Stel pointStyle in voor de legend items
+              };
+            });
+          }
         }
       },
       title: {
@@ -1018,26 +1125,28 @@ maakGrafiekSpoedLeeftijd = function(spoedeLeeftijdData, referentieSpoedeLeeftijd
   return spoedLeeftijdChart;
 };
 
-
 //GRAFIEK leeftijdsverdeling van geplande opnames
 maakGrafiekGeplandeLeeftijd = function(geplandeLeeftijdData, referentieGeplandeLeeftijdData){
   var geplandLeeftijdData = {
     labels: ['18-40 jaar', '40-50 jaar', '50-60 jaar', '60-70 jaar', '70-80 jaar', '80+ jaar'],
     datasets: [{
-      label: ['mei 2023'],
+      label: ['Mei 2023'],
       data: geplandeLeeftijdData,
       backgroundColor: 'rgba(54,162,235,0.5)', 
       borderColor: 'rgba(54,162,235,1)',
       type: 'bar',
-      pointStyle: 'rect'
+      pointStyle: 'rect',
+      order: 2
     }, {
-      label: ['gem. mei 2021/2022'],
+      label: ['Gem. mei 2021/2022'],
       data: referentieGeplandeLeeftijdData,
       fill: false, 
       borderColor: 'rgb(255,99,132)', 
+      backgroundColor: 'rgb(255,99,132)',	
       type: 'line',
-      pointStyle: 'circle'
-    }]
+      pointStyle: 'circle',
+      order: 1
+    }, ]
   };
   var geplandLeeftijdOptions = {
     plugins: {
@@ -1050,6 +1159,19 @@ maakGrafiekGeplandeLeeftijd = function(geplandeLeeftijdData, referentieGeplandeL
         },
         labels: {
           usePointStyle: true,
+          generateLabels: function(chart) {
+            const data = chart.data;
+            return data.datasets.map((dataset, i) => {
+              return {
+                text: dataset.label,
+                fillStyle: dataset.backgroundColor,
+                strokeStyle: dataset.borderColor,
+                hidden: !chart.isDatasetVisible(i),
+                datasetIndex: i, // Belangrijk voor togglen van zichtbaarheid
+                pointStyle: i === 0 ? 'rect' : 'line' // Stel pointStyle in voor de legend items
+              };
+            });
+          }
         }
       },
       title: {
@@ -1074,7 +1196,6 @@ maakGrafiekGeplandeLeeftijd = function(geplandeLeeftijdData, referentieGeplandeL
   });
   return geplandLeeftijdChart;
 };
-
 
 // Deze functie halveert de waarde van elk van de waardes in de array. Dit wordt gebruikt om gemiddelde aantallen te berekenen in de referentie arrays
 halveer = function(array){
