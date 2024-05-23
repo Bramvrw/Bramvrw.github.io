@@ -727,16 +727,16 @@ maakMaandGrafiekDiagnose = function() {
       type: 'bar',
       label: 'Aantal Community Acquired Pneumonie (CAP)',
       data: [68, 69, 68, 70, 65, 67, 73, 71, 72, 69, 64, 65, 68, 75, 70, 73, 72, 66, 63, 74, 76, 71, 69, 70, 79, 68, 76, 69, 79, 76, 63],
-      backgroundcolor: 'rgba(54,162,235, 0.5)',
-      bordercolor: 'rgb(54,162,235)',
+      backgroundColor: 'rgba(54,162,235, 0.5)',
+      borderColor: 'rgb(54,162,235)',
       pointStyle: 'rect',
       order: 2
     }, {
       type: 'bar',
       label: 'Aantal Out of Hospital Cardiac Arrests (OHCA)',
       data: [10, 9, 12, 11, 13, 7, 8, 8, 12, 13, 11, 9, 14, 7, 10, 12, 9, 13, 14, 11, 10, 7, 13, 12, 10, 15, 11, 14, 12, 12, 9],
-      backgroundcolor: 'rgba(255,99,132, 0.5)',
-      bordercolor: 'rgb(255,99,132)' ,
+      backgroundColor: 'rgba(255,99,132, 0.5)',
+      borderColor: 'rgb(255,99,132)' ,
       hidden: true,
       pointStyle: 'rect',
       order: 2
@@ -744,8 +744,8 @@ maakMaandGrafiekDiagnose = function() {
       type: 'bar',
       label: 'Aantal sepsis',
       data: [6, 8, 10, 7, 8 ,11, 6, 9, 10, 7, 8, 8, 12, 10, 9, 9, 11, 8, 10, 9, 7, 10, 9, 12, 13, 10, 8, 9, 9],
-      backgroundcolor: 'rgba(75,192,192, 0.5)' ,
-      bordercolor: 'rgb(75,192,192)',
+      backgroundColor: 'rgba(75,192,192, 0.5)' ,
+      borderColor: 'rgb(75,192,192)',
       hidden: true,
       pointStyle: 'rect',
       order: 2
@@ -753,16 +753,16 @@ maakMaandGrafiekDiagnose = function() {
       type: 'line',
       label: 'Gem. aantal CAP in 2021/2022',
       data: [84, 70, 73, 73, 72, 74, 77, 71, 70, 76, 67, 69, 73, 75, 70, 75, 73, 72, 68, 73, 79, 70, 75, 73, 82, 72, 79, 69, 71, 78, 70],
-      backgroundcolor: 'rgba(54,162,235)',
-      bordercolor: 'rgba(54,162,235)',
+      backgroundColor: 'rgba(54,162,235)',
+      borderColor: 'rgba(54,162,235)',
       pointStyle: 'circle',
       order: 1
     }, {
       type: 'line',
       label: 'Gem. aantal OHCA in 2021/2022',
       data: [20, 15, 18, 19, 16, 19, 15, 19, 16, 12, 20, 19, 17, 18, 16, 17, 22, 19, 15, 20, 17, 21, 18, 19, 19, 23, 21, 17, 14, 24, 13],
-      backgroundcolor:'rgb(255,99,132)',
-      bordercolor: 'rgb(255,99,132)',
+      backgroundColor:'rgb(255,99,132)',
+      borderColor: 'rgb(255,99,132)',
       hidden: true,
       pointStyle: 'circle',
       order: 1
@@ -770,8 +770,8 @@ maakMaandGrafiekDiagnose = function() {
       type: 'line',
       label: 'Gem. aantal sepsis in 2021/2022',
       data: [15, 16, 17, 12, 18, 15, 12, 16, 13, 15, 12, 14, 17, 16, 13, 15, 13, 18, 17, 15, 13, 16, 14, 19, 16, 15, 10, 17, 15, 19, 18],
-      backgroundcolor: 'rgb(75,192,192)',
-      bordercolor: 'rgb(75,192,192)',
+      backgroundColor: 'rgb(75,192,192)',
+      borderColor: 'rgb(75,192,192)',
       hidden: true,
       pointStyle: 'circle',
       order: 1
@@ -823,7 +823,6 @@ maakMaandGrafiekDiagnose = function() {
   });
   return maandDiagnoseChart;
 };
-
 
 //GRAFIEK opnames per dag voor een maand per leeftijdscategorie
 maakMaandGrafiekOpnamesLeeftijd = function(referentieData40Min, referentieData4050, referentieData5060, referentieData6070, referentieData7080, referentieData80Plus, data40Min, data4050, data5060, data6070, data7080, data80Plus) {
