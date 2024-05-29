@@ -17,7 +17,7 @@ function Maand() {
 };
 
 //----------FUNCTIES VOOR DATAVERWERKING---------------//
-// Deze functie halveert de waarde van elk van de waardes in de array. Dit wordt gebruikt om gemiddelde aantallen te berekenen in de referentie arrays
+// Deze functie maakt een XMLHttpRequest aan naar onze hasura database en verzend een query. Deze query wordt opgehaald en het antwoord wordt geparsed naar een JSON object en teruggestuurd
 databaseOpvrager = function(query){
   return new Promise((resolve) => {
     const request = new XMLHttpRequest();
@@ -32,6 +32,7 @@ databaseOpvrager = function(query){
   });
 };
 
+// Deze functie halveert de waarde van elk van de waardes in de array. Dit wordt gebruikt om gemiddelde aantallen te berekenen in de referentie arrays
 function halveer(array) {
   return array.map(x => x / 2);
 };
@@ -51,7 +52,7 @@ function groepeerPerWeek(data) {
 };
 
 //------------------------QUERIES------------------------//
-//Queries. Query1 vraagt het aantal medische, geplande en spoed opnames op de IC op om het totale aantal opnames in mei 2023 te berekenen. Query2 vraagt dezelfde data op, maar dan in 2021 en 2022
+// Deze query haalt alle aantallen opnames van elk soort opname op in mei 2023 en wordt op datum gesorteerd
 const opnametypesMei2023 = JSON.stringify({
   query: `{
     nvic_data(where: {datum: {_regex: "^2023-05"}}, order_by: {datum: asc}) {
@@ -63,6 +64,7 @@ const opnametypesMei2023 = JSON.stringify({
   }`
 });
 
+// Deze query haalt alle aantallen opnames van elk soort opname op in mei van 2021 en 2022 en wordt op datum gesorteerd
 const opnametypesMei20212022 = JSON.stringify({
   query: `{
     nvic_data(where: {
@@ -79,7 +81,7 @@ const opnametypesMei20212022 = JSON.stringify({
   }`
 });
 
-// Queries. De queries vragen van elk opnametype ook elke leeftijdscategorie uit. Query5 doet dit voor mei 2023. Query6 voor mei 2021 en 2022 
+ //Deze query haalt alle leeftijdscategorien in elk opnametype op uit de database in mei 2023. De data wordt op datum gesorteerd
 const leeftijdPerOpnametypesMei2023 = JSON.stringify({
   query: `{
     nvic_data(where: {datum: {_regex: "^2023-05"}}, order_by: {datum: asc}) {
@@ -106,6 +108,7 @@ const leeftijdPerOpnametypesMei2023 = JSON.stringify({
   }`
 });
 
+//Deze query haalt alle leeftijdscategorien in elk opnametype op uit de database voor mei in de jaren 2021 en 2022. De data wordt op datum gesorteerd
 const leeftijdPerOpnametypesMei20212022 = JSON.stringify({
   query: `{
     nvic_data(where: {_and: [{datum: {_regex: "-05-"}}, {datum: {_lte: "2022-12-31"}}]}, order_by: {datum: asc}) {
@@ -134,13 +137,13 @@ const leeftijdPerOpnametypesMei20212022 = JSON.stringify({
 
 //------- FUNCTIES OM DATA OP TE VRAGEN  ------------------//
 // DATA AANTALLEN OPNAMES
-// Deze functie haalt data over het totale aantal IC opnames uit mei 2021 t/m 2023 op uit de database en maakt een grafiek van deze data.
+// Deze functie maakt een grafiek van het aantal opnames per dag in mei 2023 met als referentiewaarden 2021 en 2022
 function OpnamesDag() {
   // Specificatie van arrays
   let opnamesArray = [];
   let referentieOpnamesArray = Array(31).fill(0);
 
-  // Hier wordt het totale aantal opnames per dag berekend en in een array gezet
+  // Hier wordt het totale aantal opnames per dag berekend en in een array gezet (2023)
   databaseOpvrager(opnametypesMei2023).then(opnameData => {
     opnameData.data.nvic_data.forEach(item => {
       const dagelijkseOpnames = item.aantal_gepland + item.aantal_medisch + item.aantal_spoed;
@@ -148,18 +151,19 @@ function OpnamesDag() {
     });
   });
 
-    // Tweede request wordt geopend, query2 wordt verstuurd
+  // Hier wordt het totale aantal opnames per dag berekend en in een array gezet (2021/2022)
   databaseOpvrager(opnametypesMei20212022).then(referentieOpnameData =>{
     referentieOpnameData.data.nvic_data.forEach(item => {
       const datum = new Date(item.datum);
-      const dagIndex = datum.getDate() - 1;
+      const dagIndex = datum.getDate() - 1; //getDate() geeft een getal tussen 1 en 31, maar omdat je naar index moet doe je -1 om het juiste getal te krijgen.
       referentieOpnamesArray[dagIndex] += item.aantal_gepland + item.aantal_medisch + item.aantal_spoed;
-    });     
-    // En wordt hier het gemiddelde aantal opnames per dag berekend 
+    });    
+    
+    // En wordt hier het gemiddelde aantal opnames per dag berekend voor de referentie array
     referentieOpnamesArray = halveer(referentieOpnamesArray);
 
-      // Hier wordt het maken van de grafiek opgeroepen
-     maakMaandGrafiekOpnames(opnamesArray, referentieOpnamesArray);
+    // Hier wordt het maken van de grafiek opgeroepen
+    maakMaandGrafiekOpnames(opnamesArray, referentieOpnamesArray);
   }); 
 };
 
@@ -167,36 +171,39 @@ function OpnamesDag() {
 // Deze functie haalt data over de verschillende opnametypes op uit de database in mei en maakt hier een grafiek van
 function OpnamesDagType() {
   // Specificatie van de arrays
-  let MedischArray = [];
-  let SpoedArray = [];
-  let GeplandArray = [];
-  let MedischGemiddeldArray = Array(31).fill(0);
-  let SpoedGemiddeldArray = Array(31).fill(0);
-  let GeplandGemiddeldArray = Array(31).fill(0);
+  let medischArray = [];
+  let spoedArray = [];
+  let geplandArray = [];
+  let medischGemiddeldArray = Array(31).fill(0);
+  let spoedGemiddeldArray = Array(31).fill(0);
+  let geplandGemiddeldArray = Array(31).fill(0);
 
+  // Hier wordt het aantal opnames per specifiek opnametype per dag opgeteld in de array voor dat opnametype (2023)
   databaseOpvrager(opnametypesMei2023).then(opnametypesData => {
     opnametypesData.data.nvic_data.forEach(item => {
-      MedischArray.push(item.aantal_medisch);
-      SpoedArray.push(item.aantal_spoed);
-      GeplandArray.push(item.aantal_gepland);
+      medischArray.push(item.aantal_medisch);
+      spoedArray.push(item.aantal_spoed);
+      geplandArray.push(item.aantal_gepland);
     });
   });
 
+  // Hier wordt het aantal opnames per specifiek opnametype per dag opgeteld in de array voor dat opnametype (2021/2022)
   databaseOpvrager(opnametypesMei20212022).then(referentieGemiddeldeOpnametypesData => {
     referentieGemiddeldeOpnametypesData.data.nvic_data.forEach(item => {
       const datum = new Date(item.datum);
       const dagIndex = datum.getDate() - 1;
-      MedischGemiddeldArray[dagIndex] += item.aantal_medisch;
-      SpoedGemiddeldArray[dagIndex] += item.aantal_spoed;
-      GeplandGemiddeldArray[dagIndex] += item.aantal_gepland;
+      medischGemiddeldArray[dagIndex] += item.aantal_medisch;
+      spoedGemiddeldArray[dagIndex] += item.aantal_spoed;
+      geplandGemiddeldArray[dagIndex] += item.aantal_gepland;
     });
-          // En worden hier de gemiddelde aantallen van de opnames met dat type berekend
-      MedischGemiddeldArray = halveer(MedischGemiddeldArray);
-      SpoedGemiddeldArray = halveer(SpoedGemiddeldArray);
-      GeplandGemiddeldArray = halveer(GeplandGemiddeldArray);
+    
+    // En worden hier de gemiddelde aantallen van de opnames met dat type berekend
+    medischGemiddeldArray = halveer(medischGemiddeldArray);
+    spoedGemiddeldArray = halveer(spoedGemiddeldArray);
+    geplandGemiddeldArray = halveer(geplandGemiddeldArray);
 
-      // Roept de functie aan om de grafiek te maken
-      maakMaandGrafiekOpnametypes(MedischArray, SpoedArray, GeplandArray, MedischGemiddeldArray, SpoedGemiddeldArray, GeplandGemiddeldArray);
+    // Roept de functie aan om de grafiek te maken
+    maakMaandGrafiekOpnametypes(medischArray, spoedArray, geplandArray, medischGemiddeldArray, spoedGemiddeldArray, geplandGemiddeldArray);
   });
 };
 
@@ -217,6 +224,7 @@ function OpnamesLeeftijd() {
   let referentieData7080 = Array(31).fill(0);
   let referentieData80Plus = Array(31).fill(0);
 
+  // Hier word het aantal opnames per leeftijdcategorie per dag opgeteld in een array (2023)
   databaseOpvrager(leeftijdPerOpnametypesMei2023).then(leeftijdData => {
     leeftijdData.data.nvic_data.forEach(item => {
       const datum = new Date(item.datum);
@@ -230,44 +238,47 @@ function OpnamesLeeftijd() {
       data80Plus[dagIndex] += item.aantal_gepland_80plus + item.aantal_medisch_80plus + item.aantal_spoed_80plus;
     });
   });
-
-databaseOpvrager(leeftijdPerOpnametypesMei20212022).then(referentieGemiddeldeLeeftijdData => {
-    referentieGemiddeldeLeeftijdData.data.nvic_data.forEach(item => {
-      const datum = new Date(item.datum);
-      const dagIndex = datum.getDate() - 1; 
-        //getDate() geeft een getal tussen 1 en 31, maar omdat je naar index moet doe je -1 om het juiste getal te krijgen.
-      referentieData40Min[dagIndex] += item.aantal_gepland_40min + item.aantal_medisch_40min + item.aantal_spoed_40min;
-      referentieData4050[dagIndex] += item.aantal_gepland_40_50 + item.aantal_medisch_40_50 + item.aantal_spoed_40_50;
-      referentieData5060[dagIndex] += item.aantal_gepland_50_60 + item.aantal_medisch_50_60 + item.aantal_spoed_50_60;
-      referentieData6070[dagIndex] += item.aantal_gepland_60_70 + item.aantal_medisch_60_70 + item.aantal_spoed_60_70;
-      referentieData7080[dagIndex] += item.aantal_gepland_70_80 + item.aantal_medisch_70_80 + item.aantal_spoed_70_80;
-      referentieData80Plus[dagIndex] += item.aantal_gepland_80plus + item.aantal_medisch_80plus + item.aantal_spoed_80plus;
+  setTimeout(function(){  //De timeout zorgt ervoor dat de data genoeg tijd heeft om verwerkt te worden voordat de grafiek wordt gemaakt
+    // Hier word het aantal opnames per leeftijdcategorie per dag opgeteld in een array (2021/2022)
+    databaseOpvrager(leeftijdPerOpnametypesMei20212022).then(referentieGemiddeldeLeeftijdData => {
+      referentieGemiddeldeLeeftijdData.data.nvic_data.forEach(item => {
+        const datum = new Date(item.datum);
+        const dagIndex = datum.getDate() - 1; 
+          
+        referentieData40Min[dagIndex] += item.aantal_gepland_40min + item.aantal_medisch_40min + item.aantal_spoed_40min;
+        referentieData4050[dagIndex] += item.aantal_gepland_40_50 + item.aantal_medisch_40_50 + item.aantal_spoed_40_50;
+        referentieData5060[dagIndex] += item.aantal_gepland_50_60 + item.aantal_medisch_50_60 + item.aantal_spoed_50_60;
+        referentieData6070[dagIndex] += item.aantal_gepland_60_70 + item.aantal_medisch_60_70 + item.aantal_spoed_60_70;
+        referentieData7080[dagIndex] += item.aantal_gepland_70_80 + item.aantal_medisch_70_80 + item.aantal_spoed_70_80;
+        referentieData80Plus[dagIndex] += item.aantal_gepland_80plus + item.aantal_medisch_80plus + item.aantal_spoed_80plus;
+      });
+    
+      // En worden de gemiddeldes berekend per leeftijdscategorie
+      referentieData40Min = halveer(referentieData40Min);
+      referentieData4050 = halveer(referentieData4050);
+      referentieData5060 = halveer(referentieData5060);
+      referentieData6070 = halveer(referentieData6070);
+      referentieData7080 = halveer(referentieData7080);
+      referentieData80Plus = halveer(referentieData80Plus);
+    
+      // Daarna worden alle arrays gegroepeerd per week om een week-weergave te kunnen creeeren
+      data40Min = groepeerPerWeek(data40Min);
+      data4050 = groepeerPerWeek(data4050);
+      data5060 = groepeerPerWeek(data5060);
+      data6070 = groepeerPerWeek(data6070);
+      data7080 = groepeerPerWeek(data7080);
+      data80Plus = groepeerPerWeek(data80Plus);
+      referentieData40Min = groepeerPerWeek(referentieData40Min);
+      referentieData4050 = groepeerPerWeek(referentieData4050);
+      referentieData5060 = groepeerPerWeek(referentieData5060);
+      referentieData6070 = groepeerPerWeek(referentieData6070);
+      referentieData7080 = groepeerPerWeek(referentieData7080);
+      referentieData80Plus = groepeerPerWeek(referentieData80Plus);
+  
+      // En hier wordt de functie opgeroepen om de grafiek te maken
+      maakMaandGrafiekOpnamesLeeftijd(data40Min, data4050, data5060, data6070, data7080, data80Plus, referentieData40Min, referentieData4050, referentieData5060, referentieData6070, referentieData7080, referentieData80Plus);
     });
-  // En worden de gemiddeldes berekend per leeftijdscategorie
-  referentieData40Min = halveer(referentieData40Min);
-  referentieData4050 = halveer(referentieData4050);
-  referentieData5060 = halveer(referentieData5060);
-  referentieData6070 = halveer(referentieData6070);
-  referentieData7080 = halveer(referentieData7080);
-  referentieData80Plus = halveer(referentieData80Plus);
-    // Daarna worden alle arrays gegroepeerd per week om een week-weergave te kunnen creeeren 
-    data40Min = groepeerPerWeek(data40Min);
-    data4050 = groepeerPerWeek(data4050);
-    data5060 = groepeerPerWeek(data5060);
-    data6070 = groepeerPerWeek(data6070);
-    data7080 = groepeerPerWeek(data7080);
-    data80Plus = groepeerPerWeek(data80Plus);
-
-    referentieData40Min = groepeerPerWeek(referentieData40Min);
-    referentieData4050 = groepeerPerWeek(referentieData4050);
-    referentieData5060 = groepeerPerWeek(referentieData5060);
-    referentieData6070 = groepeerPerWeek(referentieData6070);
-    referentieData7080 = groepeerPerWeek(referentieData7080);
-    referentieData80Plus = groepeerPerWeek(referentieData80Plus);
-
-    // En hier wordt de functie opgeroepen om de grafiek te maken
-    maakMaandGrafiekOpnamesLeeftijd(referentieData40Min, referentieData4050, referentieData5060, referentieData6070, referentieData7080, referentieData80Plus, data40Min, data4050, data5060, data6070, data7080, data80Plus);
-  });
+  },250);
 };
 
 
@@ -282,6 +293,7 @@ leeftijdsverdelingPerOpnametype = function(){
   let referentieSpoedLeeftijd = Array(6).fill(0);
   let referentieGeplandLeeftijd = Array(6).fill(0);
 
+  // Hier wordt per leeftijdsgroep en opnametype het aantal opnames in een array gezet en geteld (2023)
   databaseOpvrager(leeftijdPerOpnametypesMei2023).then(opnametypesPerLeeftijd => {
     opnametypesPerLeeftijd.data.nvic_data.forEach(item => {
       medischLeeftijd[0] += item.aantal_medisch_40min;
@@ -305,6 +317,7 @@ leeftijdsverdelingPerOpnametype = function(){
     });
   });
 
+  // Hier wordt per leeftijdsgroep en opnametype het aantal opnames in een array gezet en geteld (2021/2022)
   databaseOpvrager(leeftijdPerOpnametypesMei20212022).then(referentieOpnametypesPerLeeftijd => {
     referentieOpnametypesPerLeeftijd.data.nvic_data.forEach(item => {
       referentieMedischLeeftijd[0] += item.aantal_medisch_40min;
@@ -341,7 +354,6 @@ leeftijdsverdelingPerOpnametype = function(){
 
 
 // -------------------------MAANDOVERZICHT GRAFIEKEN--------------------------//
-
 //GRAFIEK opnames per dag voor een maand
 maakMaandGrafiekOpnames = function(data, referentieData) {
   var maandChartData = {
@@ -352,7 +364,8 @@ maakMaandGrafiekOpnames = function(data, referentieData) {
       borderColor: 'rgb(54,162,235)',
       data: data,
       pointStyle: 'rect',
-      order: 2
+      order: 2,
+      hidden: false
     }, {
       type: 'line',
       label: 'Gem. aantal opnames in 2021/2022',
@@ -360,7 +373,8 @@ maakMaandGrafiekOpnames = function(data, referentieData) {
       borderColor: 'rgb(255,99,132)',
       data: referentieData,
       pointStyle: 'circle',
-      order: 1
+      order: 1,
+      hidden: false
     }],
     labels: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31']
     
@@ -393,7 +407,7 @@ maakMaandGrafiekOpnames = function(data, referentieData) {
                 strokeStyle: dataset.borderColor,
                 hidden: !chart.isDatasetVisible(i),
                 datasetIndex: i, 
-                pointStyle: i === 0 ? 'rect' : 'line'
+                pointStyle: i === 0 ? 'rect' : 'line' //Eerste dataset krijgt in de legenda een rechthoekje, de andere een lijn
               };
             });
           }
@@ -401,6 +415,7 @@ maakMaandGrafiekOpnames = function(data, referentieData) {
       }
     }
   };
+  setTimeout(function(){
   var maandChartCtx = document.getElementById('maandChart').getContext('2d');
 
   const maandChart = new Chart(maandChartCtx, {
@@ -409,6 +424,7 @@ maakMaandGrafiekOpnames = function(data, referentieData) {
     options: maandChartOptions
   });
   return maandChart;
+},250);             
 };
 
 //GRAFIEK opnames per dag voor een maand per opnametype
@@ -490,7 +506,7 @@ maakMaandGrafiekOpnametypes = function(dataMedisch, dataSpoed, dataGepland, refe
                 strokeStyle: dataset.borderColor,
                 hidden: !chart.isDatasetVisible(i),
                 datasetIndex: i, 
-                pointStyle: i < 3 ? 'rect' : 'line' 
+                pointStyle: i < 3 ? 'rect' : 'line' // De eerste drie datasets krijgen in de legenda een rechthoekje, de rest een lijntje
               };
             });
           }
@@ -506,6 +522,7 @@ maakMaandGrafiekOpnametypes = function(dataMedisch, dataSpoed, dataGepland, refe
       },
     },
   };
+  setTimeout(function(){
   var maandOpnametypesChartCtx = document.getElementById('maandOpnametypesChart').getContext('2d');
   const maandOpnametypesChart = new Chart(maandOpnametypesChartCtx, {
     data: maandOpnametypesChartData,
@@ -513,6 +530,7 @@ maakMaandGrafiekOpnametypes = function(dataMedisch, dataSpoed, dataGepland, refe
     options: maandOpnametypesChartOptions
   });
   return maandOpnametypesChart;
+  },250);
 };
 
 //GRAFIEK opnames per dag in de maand mei per diagnosecategorie
@@ -594,7 +612,7 @@ maakMaandGrafiekDiagnose = function() {
                 strokeStyle: dataset.borderColor,
                 hidden: !chart.isDatasetVisible(i),
                 datasetIndex: i, 
-                pointStyle: i < 3 ? 'rect' : 'line' 
+                pointStyle: i < 3 ? 'rect' : 'line' // De eerste drie datasets krijgen in de legenda een rechthoekje, de rest een lijntje
               };
             });
           }
@@ -610,6 +628,7 @@ maakMaandGrafiekDiagnose = function() {
       },
     },
   };
+  setTimeout(function(){
   var maandDiagnoseChartCtx = document.getElementById('maandDiagnoseChart').getContext('2d');
   const maandDiagnoseChart = new Chart(maandDiagnoseChartCtx, {
     data: maandDiagnoseChartData,
@@ -617,10 +636,11 @@ maakMaandGrafiekDiagnose = function() {
     options: maandDiagnoseChartOptions
   });
   return maandDiagnoseChart;
+  },250);
 };
 
 //GRAFIEK opnames per dag voor een maand per leeftijdscategorie
-maakMaandGrafiekOpnamesLeeftijd = function(referentieData40Min, referentieData4050, referentieData5060, referentieData6070, referentieData7080, referentieData80Plus, data40Min, data4050, data5060, data6070, data7080, data80Plus) {
+maakMaandGrafiekOpnamesLeeftijd = function(data40Min, data4050, data5060, data6070, data7080, data80Plus, referentieData40Min, referentieData4050, referentieData5060, referentieData6070, referentieData7080, referentieData80Plus) {
   var maandGrafiekOpnamesLeeftijd = {
     datasets: [{
       type: 'bar',
@@ -751,7 +771,7 @@ maakMaandGrafiekOpnamesLeeftijd = function(referentieData40Min, referentieData40
                 strokeStyle: dataset.borderColor,
                 hidden: !chart.isDatasetVisible(i),
                 datasetIndex: i,
-                pointStyle: i < 6 ? 'rect' : 'line'
+                pointStyle: i < 6 ? 'rect' : 'line' // De eerste zes datasets krijgen in de legenda een rechthoekje, de rest een lijntje
               };
             });
           }
@@ -767,6 +787,7 @@ maakMaandGrafiekOpnamesLeeftijd = function(referentieData40Min, referentieData40
       },
     },
   }
+  setTimeout(function(){
   var maandChartCtx = document.getElementById('leeftijdOpnames').getContext('2d');
   const leeftijdOpnames = new Chart(maandChartCtx, {
     data: maandGrafiekOpnamesLeeftijd,
@@ -774,6 +795,7 @@ maakMaandGrafiekOpnamesLeeftijd = function(referentieData40Min, referentieData40
     options: maandGrafiekOpnamesLeeftijdOptions,
   });
   return leeftijdOpnames;
+  },250);
 };
 
 //GRAFIEK leeftijdsverdeling van medische opnames
@@ -819,7 +841,7 @@ maakGrafiekMedischeLeeftijd = function(medischeLeeftijdData, referentieMedischeL
                 strokeStyle: dataset.borderColor,
                 hidden: !chart.isDatasetVisible(i),
                 datasetIndex: i,
-                pointStyle: i === 0 ? 'rect' : 'line' 
+                pointStyle: i === 0 ? 'rect' : 'line' //Eerste dataset krijgt in de legenda een rechthoekje, de andere een lijn
               };
             });
           }
@@ -839,6 +861,7 @@ maakGrafiekMedischeLeeftijd = function(medischeLeeftijdData, referentieMedischeL
       },
     },
   };
+  setTimeout(function(){
   var medischeLeeftijdChartCtx = document.getElementById('medischeLeeftijd').getContext('2d');
   const medischeLeeftijdChart = new Chart(medischeLeeftijdChartCtx, {
     type: 'bar',
@@ -846,6 +869,7 @@ maakGrafiekMedischeLeeftijd = function(medischeLeeftijdData, referentieMedischeL
     options: medischeLeeftijdOptions
   });
   return medischeLeeftijdChart;
+  },500);
 };
 
 //GRAFIEK leeftijdsverdeling van spoed opnames
@@ -891,7 +915,7 @@ maakGrafiekSpoedLeeftijd = function(spoedeLeeftijdData, referentieSpoedeLeeftijd
                 strokeStyle: dataset.borderColor,
                 hidden: !chart.isDatasetVisible(i),
                 datasetIndex: i, 
-                pointStyle: i === 0 ? 'rect' : 'line'
+                pointStyle: i === 0 ? 'rect' : 'line' //Eerste dataset krijgt in de legenda een rechthoekje, de andere een lijn
               };
             });
           }
@@ -911,13 +935,14 @@ maakGrafiekSpoedLeeftijd = function(spoedeLeeftijdData, referentieSpoedeLeeftijd
       },
     },
   };
+  setTimeout(function(){
   var spoedLeeftijdChartCtx = document.getElementById('spoedLeeftijd').getContext('2d');
-
   const spoedLeeftijdChart = new Chart(spoedLeeftijdChartCtx, {
     data: spoedLeeftijdData,
     options: spoedLeeftijdOptions
   });
   return spoedLeeftijdChart;
+  },250);
 };
 
 //GRAFIEK leeftijdsverdeling van geplande opnames
@@ -963,7 +988,7 @@ maakGrafiekGeplandeLeeftijd = function(geplandeLeeftijdData, referentieGeplandeL
                 strokeStyle: dataset.borderColor,
                 hidden: !chart.isDatasetVisible(i),
                 datasetIndex: i, 
-                pointStyle: i === 0 ? 'rect' : 'line'
+                pointStyle: i === 0 ? 'rect' : 'line' //Eerste dataset krijgt in de legenda een rechthoekje, de andere een lijn
               };
             });
           }
@@ -983,11 +1008,12 @@ maakGrafiekGeplandeLeeftijd = function(geplandeLeeftijdData, referentieGeplandeL
       },
     },
   };
+  setTimeout(function(){
   var geplandLeeftijdChartCtx = document.getElementById('geplandLeeftijd').getContext('2d');
-
   const geplandLeeftijdChart = new Chart(geplandLeeftijdChartCtx, {
     data: geplandLeeftijdData,
     options: geplandLeeftijdOptions
   });
   return geplandLeeftijdChart;
+  },250);
 };

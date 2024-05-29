@@ -1,101 +1,161 @@
-// ------------ OPMERKINGEN -------------//
-
-
-//----------------------------------------------------------------
-
-// Grafieken voor een overzicht van opnames in heel 2023
+// Deze functie wordt gestart wanneer de jaaroverzicht pagina wordt geladen. Het zorgt ervoor dat alle grafieken worden geladen.
 function Jaar() {
+  // Grafiek voor opnames per maand in 2023
   opnamesMaand();
+
+  // Grafiek voor opnames per maand per opnametype 
   opnametypesMaand();
-  OpnamesLeeftijdMaand();
-  leeftijdsverdelingsOpnametypesMaand();
-  
-  //deze grafieken gebruiken neppe data
+
+  // Grafiek voor opnames per maad per diagnosecategorie
   maakJaarGrafiekDiagnose();
+
+  // Grafieken voor opnames per maand per leeftijdscategorie
+  OpnamesLeeftijdMaand();
+
+  // Grafieken voor opnames per maand van de leeftijdsverdeling per opnametype
+  leeftijdsverdelingsOpnametypesMaand();
+
+  // Grafiek IC-behandelduur per maand 
   maakICGrafiek();
 };
+
+//--------------------FUNCTIES VOOR DATAVERWERKING-----------//
+// Deze functie maakt een XMLHttpRequest aan naar onze hasura database en verzend een query. Deze query wordt opgehaald en het antwoord wordt geparsed naar een JSON object en teruggestuurd
+databaseOpvrager = function(query){
+  return new Promise((resolve) => {
+    const request = new XMLHttpRequest();
+    request.open('POST', 'https://clean-garfish-69.hasura.app/v1/graphql');
+    request.setRequestHeader('content-type', 'application/json');
+    request.setRequestHeader('x-hasura-admin-secret', 'JL0Fh28uE4BqS09O0EhdnQnPQ6SJSyB0LwEXd6eNpktZpR9D0qMEDd7EtOgObty4');
+    request.send(query);
+    request.onload = function() {
+      const antwoord = JSON.parse(request.response);
+      resolve(antwoord);
+    } 
+  });
+};
+
+// Deze functie halveert de waarde van elk van de waardes in de array. Dit wordt gebruikt om gemiddelde aantallen te berekenen in de referentie arrays (map zorgt ervoor dat index 0 door 2 gedeeld kan worden, etc)
+function halveer(array) {
+  return array.map(x => x / 2);
+};
+
+//---------------------QUERIES-----------------------------//
+// Deze query haalt alle aantallen opnames van elk soort opname op in 2023 en wordt op datum gesorteerd
+const opnametypes2023 = JSON.stringify({
+  query: `{
+    nvic_data(where: {datum: {_regex: "^2023"}}, order_by: {datum: asc}) {
+      datum
+      aantal_gepland
+      aantal_medisch
+      aantal_spoed
+    }
+  }`
+});
+
+// Deze query haalt alle aantallen opnames van elk soort opname op in 2021 en 2022 en wordt op datum gesorteerd
+const opnametypes20212022 = JSON.stringify({
+  query: `{
+    nvic_data(where: { datum: { _lte: "2022-12-31" } }, order_by: { datum: asc }) {
+      datum
+      aantal_gepland
+      aantal_medisch
+      aantal_spoed
+    }
+  }`
+});
+
+//Deze query haalt alle leeftijdscategorien in elk opnametype op uit de database voor het jaar 2023. De data wordt op datum gesorteerd
+const leeftijdPerOpnametypes2023 = JSON.stringify({
+  query: `{
+    nvic_data(where: {datum: {_regex: "2023"}}, order_by: {datum: asc}) {
+      datum
+      aantal_gepland_40_50
+      aantal_gepland_40min
+      aantal_gepland_50_60
+      aantal_gepland_60_70
+      aantal_gepland_70_80
+      aantal_gepland_80plus
+      aantal_medisch_40_50
+      aantal_medisch_40min
+      aantal_medisch_50_60
+      aantal_medisch_60_70
+      aantal_medisch_70_80
+      aantal_medisch_80plus
+      aantal_spoed_40_50
+      aantal_spoed_40min
+      aantal_spoed_50_60
+      aantal_spoed_60_70
+      aantal_spoed_70_80
+      aantal_spoed_80plus
+    }
+  }`
+});
+
+//Deze query haalt alle leeftijdscategorien in elk opnametype op uit de database voor de jaren 2021 en 2022. De data wordt op datum gesorteerd
+const leeftijdPerOpnametypes20212022 = JSON.stringify({
+  query: `{
+    nvic_data(where: {datum: {_lte: "2022-12-31"}}, order_by: {datum: asc}) {
+      datum
+      aantal_gepland_40_50
+      aantal_gepland_40min
+      aantal_gepland_50_60
+      aantal_gepland_60_70
+      aantal_gepland_70_80
+      aantal_gepland_80plus
+      aantal_medisch_40_50
+      aantal_medisch_40min
+      aantal_medisch_50_60
+      aantal_medisch_60_70
+      aantal_medisch_70_80
+      aantal_medisch_80plus
+      aantal_spoed_40_50
+      aantal_spoed_40min
+      aantal_spoed_50_60
+      aantal_spoed_60_70
+      aantal_spoed_70_80
+      aantal_spoed_80plus
+    }
+  }`
+});
 
 // --------------FUNCTIES OM DATA OP TE VRAGEN --------------------------//
 // DATA AANTAL OPNAMES
 // Deze functie haalt data over het totale aantal IC opnames uit 2021-2023 op uit de database en maakt een grafiek van deze data.
 opnamesMaand = function() {
-  // Specificatie van arrays en variabelen
+  // Specificatie van arrays
   let maandelijkseOpnames = Array(12).fill(0);
   let referentieMaandelijkseOpnames = Array(12).fill(0);
 
-  //Queries. 
-  const query1 = JSON.stringify({
-    query: `{
-      nvic_data(where: {datum: {_regex: "^2023"}}, order_by: {datum: asc}) {
-        datum
-        aantal_gepland
-        aantal_medisch
-        aantal_spoed
-      }
-    }`
-  });
-
-  const query2 = JSON.stringify({
-    query: `{
-      nvic_data(where: {
-        _and: [
-          { datum: { _lte: "2022-12-31" } }
-        ]
-      }, order_by: { datum: asc }) {
-        datum
-        aantal_gepland
-        aantal_medisch
-        aantal_spoed
-      }
-    }`
-  });
-
-  // Eerste request wordt geopend, query1 wordt verstuurd 
-  const request1 = new XMLHttpRequest();
-  request1.open('POST', 'https://clean-garfish-69.hasura.app/v1/graphql');
-  request1.setRequestHeader('content-type', 'application/json');
-  request1.setRequestHeader('x-hasura-admin-secret', 'JL0Fh28uE4BqS09O0EhdnQnPQ6SJSyB0LwEXd6eNpktZpR9D0qMEDd7EtOgObty4');
-  request1.send(query1);
-
-  // Hier wordt het totale aantal opnames per maand berekend en in een array gezet. Dit wordt gedaan door de data te filteren op de maand en daarna de aantallen te tellen
-  request1.onload = function() {
-    const opnameData = JSON.parse(request1.response);
+  // De data wordt per maand opgeteld in een array (2023)
+  databaseOpvrager(opnametypes2023).then(opnameData => {
     opnameData.data.nvic_data.forEach(item => {
       const datum = new Date(item.datum);
       const maandIndex = datum.getMonth();
-      
       maandelijkseOpnames[maandIndex] += item.aantal_gepland + item.aantal_medisch + item.aantal_spoed;
     });
+  });
+
+  // De data wordt per maand opgeteld in een array (2021/2022)
+  databaseOpvrager(opnametypes20212022).then(referentieOpnameData => {
+    referentieOpnameData.data.nvic_data.forEach(item => {
+      const datum = new Date(item.datum);
+      const maandIndex = datum.getMonth();
+      referentieMaandelijkseOpnames[maandIndex] += item.aantal_gepland + item.aantal_medisch + item.aantal_spoed;
+    });
     
-    // Tweede request wordt geopend, query2 wordt verstuurd
-    const request2 = new XMLHttpRequest();
-    request2.open('POST', 'https://clean-garfish-69.hasura.app/v1/graphql');
-    request2.setRequestHeader('content-type', 'application/json');
-    request2.setRequestHeader('x-hasura-admin-secret', 'JL0Fh28uE4BqS09O0EhdnQnPQ6SJSyB0LwEXd6eNpktZpR9D0qMEDd7EtOgObty4');
-    request2.send(query2);
-
-    // De data van 2021 en 2022 wordt hier verwerkt door te filteren op maand en vervolgens de aantallen opnames bij elkaar op te tellen.
-    request2.onload = function() {
-      const referentieOpnameData = JSON.parse(request2.response);
-
-      // Weer wordt de data gefilterd op maand en worden de aantallen geteld
-      referentieOpnameData.data.nvic_data.forEach(item => {
-        const datum = new Date(item.datum);
-        const maandIndex = datum.getMonth();
-        referentieMaandelijkseOpnames[maandIndex] += item.aantal_gepland + item.aantal_medisch + item.aantal_spoed;
-      });
-
-      // Hier worden de opgetelde waardes op volgorde aan de array toegevoegd nadat ze door 2 zijn gedeeld vanwege de twee jaar aan data die we als referentie gebruiken
-      referentieMaandelijkseOpnames = halveer(referentieMaandelijkseOpnames);
-      maakJaarGrafiekOpnames(maandelijkseOpnames, referentieMaandelijkseOpnames);
-    };
-  };
+    // Hier worden de gemiddeldes van de referentiewaardes berekend
+    referentieMaandelijkseOpnames = halveer(referentieMaandelijkseOpnames);
+    
+    //En wordt een functie aangeroepen om de grafiek te maken
+    maakJaarGrafiekOpnames(maandelijkseOpnames, referentieMaandelijkseOpnames);
+  });
 };
 
 // DATA OPNAMETYPES 
 // Deze functie maakt een overzicht van alle opnames per opnametype per maand in 2023, ten opzichte van de opnames per maand in 2021 en 2022.
 opnametypesMaand = function() {
-  // Specificatie van arrays en variabelen
+  // Specificatie van arrays
   let medischArray = Array(12).fill(0);
   let spoedArray = Array(12).fill(0);
   let geplandArray = Array(12).fill(0);
@@ -103,87 +163,43 @@ opnametypesMaand = function() {
   let referentieSpoedArray = Array(12).fill(0);
   let referentieGeplandArray = Array(12).fill(0);
 
-  //Queries.
-  const query3 = JSON.stringify({
-    query: `{
-        nvic_data(where: {datum: {_regex: "^2023"}}, order_by: {datum: asc}) {
-        datum
-        aantal_gepland
-        aantal_medisch
-        aantal_spoed
-        }
-      }`
-  });
-
-  const query4 = JSON.stringify({
-    query: `{
-        nvic_data(where: {
-          _and: [
-            { datum: { _lte: "2022-12-31" } }
-          ]
-        }, order_by: { datum: asc }) {
-          datum
-          aantal_gepland
-          aantal_medisch
-          aantal_spoed
-        }
-      }`
-  });
-
-  // Eerste request wordt geopend, query3 wordt verstuurd 
-  const request3 = new XMLHttpRequest();
-  request3.open('POST', 'https://clean-garfish-69.hasura.app/v1/graphql');
-  request3.setRequestHeader('content-type', 'application/json');
-  request3.setRequestHeader('x-hasura-admin-secret', 'JL0Fh28uE4BqS09O0EhdnQnPQ6SJSyB0LwEXd6eNpktZpR9D0qMEDd7EtOgObty4');
-  request3.send(query3);
-
-  // Er wordt voor elke maand bijgehouden hoeveel van elk type opname er zijn
-  request3.onload = function() {
-    const opnametypesData = JSON.parse(request3.response);
+  // Er wordt voor elke maand bijgehouden hoeveel van elk type opname er zijn (2023)
+  databaseOpvrager(opnametypes2023).then(opnametypesData => {
     opnametypesData.data.nvic_data.forEach(item => {
       const datum = new Date(item.datum);
       const maandIndex = datum.getMonth();
-      
+
       medischArray[maandIndex] += item.aantal_medisch;
       spoedArray[maandIndex] += item.aantal_spoed;
       geplandArray[maandIndex] += item.aantal_gepland;
     });
-  };
+  });
 
-  // Tweede request wordt geopend, query4 wordt verstuurd
-  const request4 = new XMLHttpRequest();
-  request4.open('POST', 'https://clean-garfish-69.hasura.app/v1/graphql');
-  request4.setRequestHeader('content-type', 'application/json');
-  request4.setRequestHeader('x-hasura-admin-secret', 'JL0Fh28uE4BqS09O0EhdnQnPQ6SJSyB0LwEXd6eNpktZpR9D0qMEDd7EtOgObty4');
-  request4.send(query4);
-
-  // De data van 2021 en 2022 wordt hier verwerkt door te filteren op maand en vervolgens de aantallen opnames voor elke soort opname bij elkaar op te tellen.
-  request4.onload = function() {
-    const referentieOpnametypeData = JSON.parse(request4.response);
- 
+  // Er wordt voor elke maand bijgehouden hoeveel van elk type opname er zijn (2021/2022)
+  databaseOpvrager(opnametypes20212022).then(referentieOpnametypeData => {
     referentieOpnametypeData.data.nvic_data.forEach(item => {
       const datum = new Date(item.datum);
       const maandIndex = datum.getMonth();
-      
+
       referentieMedischArray[maandIndex] += item.aantal_medisch;
       referentieSpoedArray[maandIndex] += item.aantal_spoed;
       referentieGeplandArray[maandIndex] += item.aantal_gepland;
     });
-
-    // Hier worden alle waardes in correcte volgorde aan de juiste arrays toegevoegd
-      referentieMedischArray = referentieMedischArray.map(x => x / 2);
-      referentieSpoedArray = referentieSpoedArray.map(x => x / 2);
-      referentieGeplandArray = referentieGeplandArray.map(x => x / 2);
-    // Als laatste wordt de data van de arrays doorgegeven aan deze functie om hier een grafiek van te maken
+    
+    // Hier worden de gemiddeldes van de referentiewaardes berekend
+    referentieMedischArray = halveer(referentieMedischArray);
+    referentieSpoedArray = halveer(referentieSpoedArray);
+    referentieGeplandArray = halveer(referentieGeplandArray);
+    
+    // Als laatste wordt de data doorgegeven aan deze functie om een grafiek te maken
     maakJaarGrafiekOpnametypes(medischArray, spoedArray, geplandArray, referentieMedischArray, referentieSpoedArray, referentieGeplandArray);
-  };
+  });
 };
 
 // DATA LEEFTIJDSCATEGORIEN
-// Deze functie maakt een grafiek van de data per leeftijdscategorie per maand over heel 2023. Met een gemiddelde aantal opnames per maand per leeftijdscategorie van 2o21 en 2022.
+// Deze functie maakt een grafiek van de data per leeftijdscategorie per maand over heel 2023. Met een gemiddelde aantal opnames per maand per leeftijdscategorie van 2021 en 2022.
 function OpnamesLeeftijdMaand() {
-   // op deze manier maak je een array met precies 12 elementen, allemaal ingesteld op 0. Hierdoor kun je direct waarden optellen bij specifieke indexen  waardoor je maandelijkseTotalen40Min[maandIndex] kan gebruiken om per maand het op te tellen en hoef je niet iedere maand los te coderen.
-  
+  // Specificatie van arrays
   let maandelijkseTotalen40Min = Array(12).fill(0);
   let maandelijkseTotalen4050 = Array(12).fill(0);
   let maandelijkseTotalen5060 = Array(12).fill(0);
@@ -197,190 +213,61 @@ function OpnamesLeeftijdMaand() {
   let referentieData7080 = Array(12).fill(0);
   let referentieData80Plus = Array(12).fill(0);
 
-  const query5 = JSON.stringify({
-    query: `{
-      nvic_data(where: {datum: {_regex: "2023"}}, order_by: {datum: asc}) {
-        datum
-        aantal_gepland_40_50
-        aantal_gepland_40min
-        aantal_gepland_50_60
-        aantal_gepland_60_70
-        aantal_gepland_70_80
-        aantal_gepland_80plus
-        aantal_medisch_40_50
-        aantal_medisch_40min
-        aantal_medisch_50_60
-        aantal_medisch_60_70
-        aantal_medisch_70_80
-        aantal_medisch_80plus
-        aantal_spoed_40_50
-        aantal_spoed_40min
-        aantal_spoed_50_60
-        aantal_spoed_60_70
-        aantal_spoed_70_80
-        aantal_spoed_80plus
-      }
-    }`
+  // De aantallen opnames van elke leeftijdscategorie worden per maand opgeslagen in de array voor die leeftijdscategorie (2023)
+  databaseOpvrager(leeftijdPerOpnametypes2023).then(leeftijdData => {
+    leeftijdData.data.nvic_data.forEach(item => {
+      const datum = new Date(item.datum);
+      const maandIndex = datum.getMonth();
+
+      maandelijkseTotalen40Min[maandIndex] += item.aantal_gepland_40min + item.aantal_medisch_40min + item.aantal_spoed_40min;
+      maandelijkseTotalen4050[maandIndex] += item.aantal_gepland_40_50 + item.aantal_medisch_40_50 + item.aantal_spoed_40_50;
+      maandelijkseTotalen5060[maandIndex] += item.aantal_gepland_50_60 + item.aantal_medisch_50_60 + item.aantal_spoed_50_60;
+      maandelijkseTotalen6070[maandIndex] += item.aantal_gepland_60_70 + item.aantal_medisch_60_70 + item.aantal_spoed_60_70;
+      maandelijkseTotalen7080[maandIndex] += item.aantal_gepland_70_80 + item.aantal_medisch_70_80 + item.aantal_spoed_70_80;
+      maandelijkseTotalen80Plus[maandIndex] += item.aantal_gepland_80plus + item.aantal_medisch_80plus + item.aantal_spoed_80plus;
+    });
   });
 
-  const query6 = JSON.stringify({
-    query: `{
-      nvic_data(where: {datum: {_lte: "2022-12-31"}}, order_by: {datum: asc}) {
-        datum
-        aantal_gepland_40_50
-        aantal_gepland_40min
-        aantal_gepland_50_60
-        aantal_gepland_60_70
-        aantal_gepland_70_80
-        aantal_gepland_80plus
-        aantal_medisch_40_50
-        aantal_medisch_40min
-        aantal_medisch_50_60
-        aantal_medisch_60_70
-        aantal_medisch_70_80
-        aantal_medisch_80plus
-        aantal_spoed_40_50
-        aantal_spoed_40min
-        aantal_spoed_50_60
-        aantal_spoed_60_70
-        aantal_spoed_70_80
-        aantal_spoed_80plus
-      }
-    }`
+  // De aantallen opnames van elke leeftijdscategorie worden per maand opgeslagen in de array voor die leeftijdscategorie (2021/2022)
+  databaseOpvrager(leeftijdPerOpnametypes20212022).then(leeftijdDataGem => {
+    leeftijdDataGem.data.nvic_data.forEach(item => {
+      const datum = new Date(item.datum);
+      const maandIndex = datum.getMonth(); //getMonth() is zero-based, en geeft een getal tussen 0 en 11 terug voor de maand.
+      // Voeg de totalen toe aan de juiste maand in de juiste leeftijdscategorie
+      referentieData40Min[maandIndex] += item.aantal_gepland_40min + item.aantal_medisch_40min + item.aantal_spoed_40min;
+      referentieData4050[maandIndex] += item.aantal_gepland_40_50 + item.aantal_medisch_40_50 + item.aantal_spoed_40_50;
+      referentieData5060[maandIndex] += item.aantal_gepland_50_60 + item.aantal_medisch_50_60 + item.aantal_spoed_50_60;
+      referentieData6070[maandIndex] += item.aantal_gepland_60_70 + item.aantal_medisch_60_70 + item.aantal_spoed_60_70;
+      referentieData7080[maandIndex] += item.aantal_gepland_70_80 + item.aantal_medisch_70_80 + item.aantal_spoed_70_80;
+      referentieData80Plus[maandIndex] += item.aantal_gepland_80plus + item.aantal_medisch_80plus + item.aantal_spoed_80plus;
+    });
+    
+    // Daarna worden de gemiddeldes van de referentiewaarden berekend
+    referentieData40Min = halveer(referentieData40Min);
+    referentieData4050 = halveer(referentieData4050);
+    referentieData5060 = halveer(referentieData5060);
+    referentieData6070 = halveer(referentieData6070);
+    referentieData7080 = halveer(referentieData7080);
+    referentieData80Plus = halveer(referentieData80Plus);
+
+    // En wordt als laatste de data doorgegeven aan de functie die de grafiek maakt
+    maakJaarGrafiekOpnamesLeeftijd(referentieData40Min, referentieData4050, referentieData5060, referentieData6070, referentieData7080, referentieData80Plus, maandelijkseTotalen40Min, maandelijkseTotalen4050, maandelijkseTotalen5060, maandelijkseTotalen6070, maandelijkseTotalen7080, maandelijkseTotalen80Plus); 
   });
-
-  const request5 = new XMLHttpRequest();
-  request5.open('POST', 'https://clean-garfish-69.hasura.app/v1/graphql');
-  request5.setRequestHeader('content-type', 'application/json');
-  request5.setRequestHeader('x-hasura-admin-secret', 'JL0Fh28uE4BqS09O0EhdnQnPQ6SJSyB0LwEXd6eNpktZpR9D0qMEDd7EtOgObty4');
-  request5.send(query5);
-
-    request5.onload = function() {
-        const leeftijdData = JSON.parse(request5.response);
-        // Maak arrays voor elke leeftijdscategorie met 12 elementen voor elke maand
-        leeftijdData.data.nvic_data.forEach(item => {
-          const datum = new Date(item.datum);
-          const maandIndex = datum.getMonth(); // 0 voor januari, 1 voor februari, etc.
-          // Voeg de totalen toe aan de juiste maand in de juiste leeftijdscategorie
-          maandelijkseTotalen40Min[maandIndex] += item.aantal_gepland_40min + item.aantal_medisch_40min + item.aantal_spoed_40min;
-          maandelijkseTotalen4050[maandIndex] += item.aantal_gepland_40_50 + item.aantal_medisch_40_50 + item.aantal_spoed_40_50;
-          maandelijkseTotalen5060[maandIndex] += item.aantal_gepland_50_60 + item.aantal_medisch_50_60 + item.aantal_spoed_50_60;
-          maandelijkseTotalen6070[maandIndex] += item.aantal_gepland_60_70 + item.aantal_medisch_60_70 + item.aantal_spoed_60_70;
-          maandelijkseTotalen7080[maandIndex] += item.aantal_gepland_70_80 + item.aantal_medisch_70_80 + item.aantal_spoed_70_80;
-          maandelijkseTotalen80Plus[maandIndex] += item.aantal_gepland_80plus + item.aantal_medisch_80plus + item.aantal_spoed_80plus;
-        });
-    };
-
-      const request6 = new XMLHttpRequest();
-      request6.open('POST', 'https://clean-garfish-69.hasura.app/v1/graphql');
-      request6.setRequestHeader('content-type', 'application/json');
-      request6.setRequestHeader('x-hasura-admin-secret', 'JL0Fh28uE4BqS09O0EhdnQnPQ6SJSyB0LwEXd6eNpktZpR9D0qMEDd7EtOgObty4');
-      request6.send(query6);
-
-      request6.onload = function() {
-          const leeftijdDataGem = JSON.parse(request6.response);
-            leeftijdDataGem.data.nvic_data.forEach(item => {
-            const datum = new Date(item.datum);
-            const maandIndex = datum.getMonth(); // 0 voor januari, 1 voor februari, etc.
-            // Voeg de totalen toe aan de juiste maand in de juiste leeftijdscategorie
-              referentieData40Min[maandIndex] += item.aantal_gepland_40min + item.aantal_medisch_40min + item.aantal_spoed_40min;
-              referentieData4050[maandIndex] += item.aantal_gepland_40_50 + item.aantal_medisch_40_50 + item.aantal_spoed_40_50;
-              referentieData5060[maandIndex] += item.aantal_gepland_50_60 + item.aantal_medisch_50_60 + item.aantal_spoed_50_60;
-              referentieData6070[maandIndex] += item.aantal_gepland_60_70 + item.aantal_medisch_60_70 + item.aantal_spoed_60_70;
-              referentieData7080[maandIndex] += item.aantal_gepland_70_80 + item.aantal_medisch_70_80 + item.aantal_spoed_70_80;
-              referentieData80Plus[maandIndex] += item.aantal_gepland_80plus + item.aantal_medisch_80plus + item.aantal_spoed_80plus;
-          });
-//voor berekenen gemiddelde (map zorgt ervoor dat index 0 door 2 gedeeld kan worden, etc)
-            referentieData40Min = referentieData40Min.map(x => x / 2);
-            referentieData4050 = referentieData4050.map(x => x / 2); 
-            referentieData5060 = referentieData5060.map(x => x / 2);
-            referentieData6070 = referentieData6070.map(x => x / 2);
-            referentieData7080 = referentieData7080.map(x => x / 2); 
-            referentieData80Plus = referentieData80Plus.map(x => x / 2);
-        
-maakJaarGrafiekOpnamesLeeftijd(referentieData40Min, referentieData4050, referentieData5060, referentieData6070, referentieData7080, referentieData80Plus, maandelijkseTotalen40Min, maandelijkseTotalen4050, maandelijkseTotalen5060, maandelijkseTotalen6070, maandelijkseTotalen7080, maandelijkseTotalen80Plus);
-        
-      };
-    } 
+}; 
 
 // DATA LEEFTIJDSVERDELING OVER OPNAMETYPES
-// Deze functie ...
+// Deze functie maakt drie grafieken om de leeftijdsverdeling per opnametype te berekenen voor 2023 en het gemiddelde van 2021 en 2022
 leeftijdsverdelingsOpnametypesMaand = function() {
-  // Specificatie van arrays en variabelen
+  // Specificatie van arrays
   let medischLeeftijd = Array(6).fill(0);
   let spoedLeeftijd = Array(6).fill(0);
   let geplandLeeftijd = Array(6).fill(0);
   let referentieMedischLeeftijd = Array(6).fill(0);
   let referentieSpoedLeeftijd = Array(6).fill(0);
   let referentieGeplandLeeftijd = Array(6).fill(0);
-  
-  // Queries. Query7 en query8 zoeken alle leeftijdscategorien op binnen alle opnametypes. Query7 doet dit voor heel 2023 en query8 doet dit voor 2021 en 2022
-  const query7 = JSON.stringify({
-    query: `{
-      nvic_data(where: {datum: {_regex: "^2023"}}, order_by: {datum: asc}) {
-        datum
-        aantal_gepland_40_50
-        aantal_gepland_40min
-        aantal_gepland_50_60
-        aantal_gepland_60_70
-        aantal_gepland_70_80
-        aantal_gepland_80plus
-        aantal_medisch_40_50
-        aantal_medisch_40min
-        aantal_medisch_50_60
-        aantal_medisch_60_70
-        aantal_medisch_70_80
-        aantal_medisch_80plus
-        aantal_spoed_40_50
-        aantal_spoed_40min
-        aantal_spoed_50_60
-        aantal_spoed_60_70
-        aantal_spoed_70_80
-        aantal_spoed_80plus
-      }
-    }`
-  });
 
-  const query8 = JSON.stringify({
-    query: `{
-      nvic_data(where: {
-          _and: [
-            { datum: { _lte: "2022-12-31" } }
-          ]
-        }, order_by: { datum: asc }) {
-    datum
-    aantal_gepland_40_50
-    aantal_gepland_40min
-    aantal_gepland_50_60
-    aantal_gepland_60_70
-    aantal_gepland_70_80
-    aantal_gepland_80plus
-    aantal_medisch_40_50
-    aantal_medisch_40min
-    aantal_medisch_50_60
-    aantal_medisch_60_70
-    aantal_medisch_70_80
-    aantal_medisch_80plus
-    aantal_spoed_40_50
-    aantal_spoed_40min
-    aantal_spoed_50_60
-    aantal_spoed_60_70
-    aantal_spoed_70_80
-    aantal_spoed_80plus
-  }
-    }`
-  });
-
-  // Eerste request wordt geopend, query7 wordt verstuurd 
-  const request7 = new XMLHttpRequest();
-  request7.open('POST', 'https://clean-garfish-69.hasura.app/v1/graphql');
-  request7.setRequestHeader('content-type', 'application/json');
-  request7.setRequestHeader('x-hasura-admin-secret', 'JL0Fh28uE4BqS09O0EhdnQnPQ6SJSyB0LwEXd6eNpktZpR9D0qMEDd7EtOgObty4');
-  request7.send(query7);
-
-  // Hier worden de aantallen opnames per leeftijdscategorien per opnametype bij elkaar opgeteld
-  request7.onload = function(){
-    const opnametypesPerLeeftijd = JSON.parse(request7.response);
+  // Hier worden de aantallen opnames per leeftijdscategorien per opnametype bij elkaar opgeteld (2023)
+  databaseOpvrager(leeftijdPerOpnametypes2023).then(opnametypesPerLeeftijd => {
     opnametypesPerLeeftijd.data.nvic_data.forEach(item => {
       medischLeeftijd[0] += item.aantal_medisch_40min;
       medischLeeftijd[1] += item.aantal_medisch_40_50;
@@ -401,50 +288,44 @@ leeftijdsverdelingsOpnametypesMaand = function() {
       geplandLeeftijd[4] += item.aantal_gepland_70_80;
       geplandLeeftijd[5] += item.aantal_gepland_80plus;
     });
-    // Tweede request wordt geopend, query4 wordt verstuurd
-    const request8 = new XMLHttpRequest();
-    request8.open('POST', 'https://clean-garfish-69.hasura.app/v1/graphql');
-    request8.setRequestHeader('content-type', 'application/json');
-    request8.setRequestHeader('x-hasura-admin-secret', 'JL0Fh28uE4BqS09O0EhdnQnPQ6SJSyB0LwEXd6eNpktZpR9D0qMEDd7EtOgObty4');
-    request8.send(query8);
+  });
 
-    request8.onload = function(){
-      const referentieOpnametypesPerLeeftijd = JSON.parse(request8.response);
+  // Hier worden de aantallen opnames per leeftijdscategorie per opnametype bij elkaar opgeteld (2021/2022)
+  databaseOpvrager(leeftijdPerOpnametypes20212022).then(referentieOpnametypesPerLeeftijd => {
+    referentieOpnametypesPerLeeftijd.data.nvic_data.forEach(item => {
+      referentieMedischLeeftijd[0] += item.aantal_medisch_40min;
+      referentieMedischLeeftijd[1] += item.aantal_medisch_40_50;
+      referentieMedischLeeftijd[2] += item.aantal_medisch_50_60;
+      referentieMedischLeeftijd[3] += item.aantal_medisch_60_70;
+      referentieMedischLeeftijd[4] += item.aantal_medisch_70_80;
+      referentieMedischLeeftijd[5] += item.aantal_medisch_80plus;
+      referentieSpoedLeeftijd[0] += item.aantal_spoed_40min;
+      referentieSpoedLeeftijd[1] += item.aantal_spoed_40_50;  
+      referentieSpoedLeeftijd[2] += item.aantal_spoed_50_60;
+      referentieSpoedLeeftijd[3] += item.aantal_spoed_60_70;
+      referentieSpoedLeeftijd[4] += item.aantal_spoed_70_80;
+      referentieSpoedLeeftijd[5] += item.aantal_spoed_80plus;
+      referentieGeplandLeeftijd[0] += item.aantal_gepland_40min;
+      referentieGeplandLeeftijd[1] += item.aantal_gepland_40_50;
+      referentieGeplandLeeftijd[2] += item.aantal_gepland_50_60;
+      referentieGeplandLeeftijd[3] += item.aantal_gepland_60_70;
+      referentieGeplandLeeftijd[4] += item.aantal_gepland_70_80;
+      referentieGeplandLeeftijd[5] += item.aantal_gepland_80plus;
+    });
+    // Dan worden hier de gemiddeldes van de referentiewaarden berekend
+    referentieMedischLeeftijd = halveer(referentieMedischLeeftijd);
+    referentieSpoedLeeftijd = halveer(referentieSpoedLeeftijd);
+    referentieGeplandLeeftijd = halveer(referentieGeplandLeeftijd);
 
-      referentieOpnametypesPerLeeftijd.data.nvic_data.forEach(item =>{
-          referentieMedischLeeftijd[0] += item.aantal_medisch_40min;
-          referentieMedischLeeftijd[1] += item.aantal_medisch_40_50;
-          referentieMedischLeeftijd[2] += item.aantal_medisch_50_60;
-          referentieMedischLeeftijd[3] += item.aantal_medisch_60_70;
-          referentieMedischLeeftijd[4] += item.aantal_medisch_70_80;
-          referentieMedischLeeftijd[5] += item.aantal_medisch_80plus;
-          referentieSpoedLeeftijd[0] += item.aantal_spoed_40min;
-          referentieSpoedLeeftijd[1] += item.aantal_spoed_40_50;  
-          referentieSpoedLeeftijd[2] += item.aantal_spoed_50_60;
-          referentieSpoedLeeftijd[3] += item.aantal_spoed_60_70;
-          referentieSpoedLeeftijd[4] += item.aantal_spoed_70_80;
-          referentieSpoedLeeftijd[5] += item.aantal_spoed_80plus;
-          referentieGeplandLeeftijd[0] += item.aantal_gepland_40min;
-          referentieGeplandLeeftijd[1] += item.aantal_gepland_40_50;
-          referentieGeplandLeeftijd[2] += item.aantal_gepland_50_60;
-          referentieGeplandLeeftijd[3] += item.aantal_gepland_60_70;
-          referentieGeplandLeeftijd[4] += item.aantal_gepland_70_80;
-          referentieGeplandLeeftijd[5] += item.aantal_gepland_80plus;
-      });
-          referentieMedischLeeftijd = referentieMedischLeeftijd.map(x => x / 2);
-          referentieSpoedLeeftijd = referentieSpoedLeeftijd.map(x => x / 2);
-          referentieGeplandLeeftijd = referentieGeplandLeeftijd.map(x => x / 2);
-
-      // Hier wordt de data doorgegeven aan deze drie functies om per opnametype een grafiek te maken
-      maakGrafiekMedischeLeeftijd(medischLeeftijd, referentieMedischLeeftijd);
-      maakGrafiekSpoedLeeftijd(spoedLeeftijd, referentieSpoedLeeftijd);
-      maakGrafiekGeplandeLeeftijd(geplandLeeftijd, referentieGeplandLeeftijd);
-    }; 
-  }; 
+    // Hier wordt de data doorgegeven aan deze drie functies om per opnametype een grafiek te maken
+    maakGrafiekMedischeLeeftijd(medischLeeftijd, referentieMedischLeeftijd);
+    maakGrafiekSpoedLeeftijd(spoedLeeftijd, referentieSpoedLeeftijd);
+    maakGrafiekGeplandeLeeftijd(geplandLeeftijd, referentieGeplandLeeftijd);
+  }); 
 }; 
 
 
-// --------------------------------JAAROVERZICHT GRAFIEKEN-------------------//
+// -----------------------------JAAROVERZICHT GRAFIEKEN---------------------------//
 
 //GRAFIEK Aantal opnames per maand in 2023
 maakJaarGrafiekOpnames = function(data, referentiedata) {
@@ -453,12 +334,14 @@ maakJaarGrafiekOpnames = function(data, referentiedata) {
       type: 'bar',
       label: 'Aantal opnames 2023',
       data: data,
-      pointStyle: 'rect'
+      pointStyle: 'rect',
+      order: 2
     }, {
       type: 'line',
       label: 'Gem. aantal opnames in 2021/2022',
       data: referentiedata,
-      pointStyle: 'circle'
+      pointStyle: 'circle',
+      order: 1
     }],
     labels: ['Januari', 'Februari', 'Maart', 'April', 'Mei', 'Juni', 'Juli', 'Augustus', 'September', 'Oktober', 'November', 'December']
   };
@@ -482,8 +365,8 @@ maakJaarGrafiekOpnames = function(data, referentiedata) {
                 fillStyle: dataset.backgroundColor,
                 strokeStyle: dataset.borderColor,
                 hidden: !chart.isDatasetVisible(i),
-                datasetIndex: i, // Belangrijk voor togglen van zichtbaarheid
-                pointStyle: i === 0 ? 'rect' : 'line' // Stel pointStyle in voor de legend items
+                datasetIndex: i, 
+                pointStyle: i === 0 ? 'rect' : 'line' //Eerste dataset krijgt in de legenda een rechthoekje, de andere een lijn
               };
             });
           }
@@ -587,7 +470,7 @@ maakJaarGrafiekOpnametypes = function(medischData, spoedData, geplandData, refer
                 strokeStyle: dataset.borderColor,
                 hidden: !chart.isDatasetVisible(i),
                 datasetIndex: i,
-                pointStyle: i < 3 ? 'rect' : 'line'
+                pointStyle: i < 3 ? 'rect' : 'line' // De eerste drie datasets krijgen in de legenda een rechthoekje, de rest een lijntje
               };
             });
           }
@@ -603,6 +486,7 @@ maakJaarGrafiekOpnametypes = function(medischData, spoedData, geplandData, refer
       },
     },
   };
+  setTimeout(function(){
   var jaarOpnametypesChartCtx = document.getElementById('jaarOpnametypesChart').getContext('2d');
   const jaarOpnametypesChart = new Chart(jaarOpnametypesChartCtx, {
     data: jaarOpnametypesChartData,
@@ -610,6 +494,7 @@ maakJaarGrafiekOpnametypes = function(medischData, spoedData, geplandData, refer
     options: jaarOpnametypesChartOptions
   });
   return jaarOpnametypesChart;
+  },250);
 };
 
 //GRAFIEK Aantal opnames per maand gebaseerd op opnametype
@@ -691,7 +576,7 @@ maakJaarGrafiekDiagnose = function() {
                 strokeStyle: dataset.borderColor,
                 hidden: !chart.isDatasetVisible(i),
                 datasetIndex: i,
-                pointStyle: i < 3 ? 'rect' : 'line'
+                pointStyle: i < 3 ? 'rect' : 'line' // De eerste drie datasets krijgen in de legenda een rechthoekje, de rest een lijntje
               };
             });
           }
@@ -707,6 +592,7 @@ maakJaarGrafiekDiagnose = function() {
       },
     },
   };
+  setTimeout(function(){
   var jaarDiagnoseChartCtx = document.getElementById('jaarDiagnoseChart').getContext('2d');
   const jaarDiagnoseChart = new Chart(jaarDiagnoseChartCtx, {
     data: jaarDiagnoseChartData,
@@ -714,6 +600,7 @@ maakJaarGrafiekDiagnose = function() {
     options: jaarDiagnoseChartOptions
   });
   return jaarDiagnoseChart;
+  },250);
 };
 
 //GRAFIEK Aantal opnames per maand gebaseerd op leeftijdsgroep
@@ -849,7 +736,7 @@ maakJaarGrafiekOpnamesLeeftijd = function(referentieData40Min, referentieData405
                 strokeStyle: dataset.borderColor,
                 hidden: !chart.isDatasetVisible(i),
                 datasetIndex: i,
-                pointStyle: i < 6 ? 'rect' : 'line'
+                pointStyle: i < 6 ? 'rect' : 'line' // De eerste zes datasets krijgen in de legenda een rechthoekje, de rest een lijntje
               };
             });
           }
@@ -865,6 +752,7 @@ maakJaarGrafiekOpnamesLeeftijd = function(referentieData40Min, referentieData405
       },
     },
   };
+  setTimeout(function(){
   var jaarLeeftijdChartCtx = document.getElementById('jaarLeeftijdChart').getContext('2d');
   const jaarLeeftijdChart = new Chart(jaarLeeftijdChartCtx, {
     data: jaarGrafiekOpnamesLeeftijd,
@@ -872,6 +760,7 @@ maakJaarGrafiekOpnamesLeeftijd = function(referentieData40Min, referentieData405
     options: jaarGrafiekOpnamesLeeftijdOptions,
   });
   return jaarLeeftijdChart;
+  },250);
 };
 
 //GRAFIEK leeftijdsverdeling van medische opnames
@@ -916,8 +805,8 @@ maakGrafiekMedischeLeeftijd = function(medischeLeeftijdData, referentieMedischeL
                 fillStyle: dataset.backgroundColor,
                 strokeStyle: dataset.borderColor,
                 hidden: !chart.isDatasetVisible(i),
-                datasetIndex: i, // Belangrijk voor togglen van zichtbaarheid
-                pointStyle: i === 0 ? 'rect' : 'line' // Stel pointStyle in voor de legend items
+                datasetIndex: i, 
+                pointStyle: i === 0 ? 'rect' : 'line' //Eerste dataset krijgt in de legenda een rechthoekje, de andere een lijn
               };
             });
           }
@@ -937,6 +826,7 @@ maakGrafiekMedischeLeeftijd = function(medischeLeeftijdData, referentieMedischeL
       },
     },
   };
+  setTimeout(function(){
   var medischeLeeftijdChartCtx = document.getElementById('medischeLeeftijd').getContext('2d');
   const medischeLeeftijdChart = new Chart(medischeLeeftijdChartCtx, {
     type: 'bar',
@@ -944,6 +834,7 @@ maakGrafiekMedischeLeeftijd = function(medischeLeeftijdData, referentieMedischeL
     options: medischeLeeftijdOptions
   });
   return medischeLeeftijdChart;
+  },250);
 };
 
 //GRAFIEK leeftijdsverdeling van spoed opnames
@@ -988,8 +879,8 @@ maakGrafiekSpoedLeeftijd = function(spoedeLeeftijdData, referentieSpoedeLeeftijd
                   fillStyle: dataset.backgroundColor,
                   strokeStyle: dataset.borderColor,
                   hidden: !chart.isDatasetVisible(i),
-                  datasetIndex: i, // Belangrijk voor togglen van zichtbaarheid
-                  pointStyle: i === 0 ? 'rect' : 'line' // Stel pointStyle in voor de legend items
+                  datasetIndex: i, 
+                  pointStyle: i === 0 ? 'rect' : 'line' //Eerste dataset krijgt in de legenda een rechthoekje, de andere een lijn
                 };
               });
             }
@@ -1009,6 +900,7 @@ maakGrafiekSpoedLeeftijd = function(spoedeLeeftijdData, referentieSpoedeLeeftijd
       },
     },
   };
+  setTimeout(function(){
   var spoedLeeftijdChartCtx = document.getElementById('spoedLeeftijd').getContext('2d');
 
   const spoedLeeftijdChart = new Chart(spoedLeeftijdChartCtx, {
@@ -1016,6 +908,7 @@ maakGrafiekSpoedLeeftijd = function(spoedeLeeftijdData, referentieSpoedeLeeftijd
     options: spoedLeeftijdOptions
   });
   return spoedLeeftijdChart;
+  },250);
 };
 
 //GRAFIEK leeftijdsverdeling van geplande opnames
@@ -1060,8 +953,8 @@ maakGrafiekGeplandeLeeftijd = function(geplandeLeeftijdData, referentieGeplandeL
                 fillStyle: dataset.backgroundColor,
                 strokeStyle: dataset.borderColor,
                 hidden: !chart.isDatasetVisible(i),
-                datasetIndex: i, // Belangrijk voor togglen van zichtbaarheid
-                pointStyle: i === 0 ? 'rect' : 'line' // Stel pointStyle in voor de legend items
+                datasetIndex: i,
+                pointStyle: i === 0 ? 'rect' : 'line' //Eerste dataset krijgt in de legenda een rechthoekje, de andere een lijn
               };
             });
           }
@@ -1081,6 +974,7 @@ maakGrafiekGeplandeLeeftijd = function(geplandeLeeftijdData, referentieGeplandeL
       },
     },
   };
+  setTimeout(function(){
   var geplandLeeftijdChartCtx = document.getElementById('geplandLeeftijd').getContext('2d');
 
   const geplandLeeftijdChart = new Chart(geplandLeeftijdChartCtx, {
@@ -1088,6 +982,7 @@ maakGrafiekGeplandeLeeftijd = function(geplandeLeeftijdData, referentieGeplandeL
     options: geplandLeeftijdOptions
   });
   return geplandLeeftijdChart;
+  },250);
 };
 
 //GRAFIEK IC-behandelduur
@@ -1142,6 +1037,7 @@ maakICGrafiek = function() {
         },
       },
     };
+  setTimeout(function(){
     var jaarICChartCtx = document.getElementById('jaarICChart').getContext('2d');
     const jaarICChart = new Chart(jaarICChartCtx, {
       data: jaarICChartData,
@@ -1149,10 +1045,5 @@ maakICGrafiek = function() {
       options: jaarICChartOptions
     });
     return jaarICChart;
+  },250);
   };
-
-// Deze functie halveert de waarde van elk van de waardes in de array. Dit wordt gebruikt om gemiddelde aantallen te berekenen in de referentie arrays
-halveer = function(array){
-  array = array.map(x => x / 2);
-  return array;
-};
